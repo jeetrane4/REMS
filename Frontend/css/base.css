@@ -1,0 +1,209 @@
+/* =========================
+REMS BASE SYSTEM – PRODUCTION STABLE
+========================= */
+
+
+/* ================= RESET ================= */
+
+*,
+*::before,
+*::after {
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+/* ================= HTML ================= */
+
+html{
+line-height:1.6;
+-webkit-font-smoothing:antialiased;
+text-rendering:optimizeLegibility;
+scroll-behavior:smooth;
+height:100%;
+}
+
+
+/* ================= BODY ================= */
+
+body{
+font-family:var(--font-body);
+background-color:var(--color-bg);
+color:var(--color-text-primary);
+min-height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+
+/* ================= MEDIA ================= */
+
+img,
+video,
+canvas,
+svg{
+max-width:100%;
+height:auto;
+display:block;
+}
+
+
+/* ================= LIST RESET ================= */
+
+ul,
+ol{
+list-style:none;
+}
+
+
+/* ================= TABLE RESET ================= */
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+
+/* ================= TYPOGRAPHY ================= */
+
+h1,h2,h3,h4,h5,h6{
+font-family:var(--font-heading);
+color:var(--color-text-primary);
+font-weight:600;
+line-height:1.2;
+}
+
+h1{
+font-size:clamp(32px,5vw,42px);
+margin-bottom:var(--space-lg);
+}
+
+h2{
+font-size:clamp(26px,4vw,34px);
+margin-bottom:var(--space-md);
+}
+
+h3{
+font-size:22px;
+margin-bottom:var(--space-sm);
+}
+
+p{
+color:var(--color-text-secondary);
+margin-bottom:var(--space-md);
+line-height:1.7;
+}
+
+
+/* ================= LINKS ================= */
+
+a{
+text-decoration:none;
+color:inherit;
+transition:color var(--transition);
+}
+
+a:hover{
+color:var(--color-primary);
+}
+
+
+/* ================= ACCESSIBILITY ================= */
+
+:focus-visible{
+outline:2px solid var(--color-primary);
+outline-offset:2px;
+}
+
+
+/* ================= LAYOUT ================= */
+
+.container{
+width:90%;
+max-width:1200px;
+margin:0 auto;
+}
+
+main{
+flex:1;
+}
+
+
+/* ================= SECTIONS ================= */
+
+.section{
+padding:clamp(60px,8vw,100px) 0;
+position:relative;
+}
+
+.section--light{
+background:var(--color-surface-2);
+}
+
+.section--gradient{
+background:linear-gradient(
+135deg,
+rgba(37,99,235,0.08),
+rgba(245,158,11,0.05)
+);
+}
+
+
+/* ================= FORM NORMALIZATION ================= */
+
+button,
+input,
+select,
+textarea{
+font-family:inherit;
+font-size:1rem;
+}
+
+button{
+border:none;
+background:none;
+cursor:pointer;
+}
+
+
+/* ================= UTILITIES ================= */
+
+.hidden{
+display:none !important;
+}
+
+.loading{
+overflow:hidden;
+pointer-events:none;
+}
+
+.center{
+text-align:center;
+}
+
+.text-center{
+text-align:center;
+}
+
+.small{
+font-size:0.9rem;
+}
+
+.muted-text{
+color:var(--color-text-secondary);
+}
+
+.display-title{
+font-size:clamp(64px,12vw,120px);
+font-weight:700;
+line-height:1;
+}
+
+.flex{
+display:flex;
+}
+
+.grid{
+display:grid;
+}

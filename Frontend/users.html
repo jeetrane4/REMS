@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>User Management – REMS</title>
+
+<meta name="description"
+content="Admin panel to manage platform users">
+
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main class="section dashboard-page">
+
+<div class="container">
+
+<!-- PAGE HEADER -->
+
+<div class="dashboard-header">
+
+<div>
+
+<h1>User Management</h1>
+
+<p class="muted-text">
+
+Admin control panel for managing users
+
+</p>
+
+</div>
+
+</div>
+
+
+<!-- SUMMARY -->
+
+<section class="section section-light">
+
+<div class="dashboard-grid">
+
+<div class="card summary-card">
+
+<h3 id="totalUsers">0</h3>
+
+<p>Total Users</p>
+
+</div>
+
+<div class="card summary-card">
+
+<h3 id="totalBuyers">0</h3>
+
+<p>Buyers</p>
+
+</div>
+
+<div class="card summary-card">
+
+<h3 id="totalSellers">0</h3>
+
+<p>Sellers / Agents</p>
+
+</div>
+
+<div class="card summary-card">
+
+<h3 id="activeUsers">0</h3>
+
+<p>Active Users</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- FILTER BAR -->
+
+<div class="card filter-bar">
+
+<div class="filter-group">
+
+<label>Search</label>
+
+<input
+type="text"
+id="searchUser"
+placeholder="Search users">
+
+</div>
+
+<div class="filter-group">
+
+<label>Role</label>
+
+<select id="roleFilter" aria-label="Filter by role type">
+
+<option value="">All</option>
+<option value="admin">Admin</option>
+<option value="buyer">Buyer</option>
+<option value="seller">Seller</option>
+<option value="agent">Agent</option>
+
+</select>
+
+</div>
+
+<div class="filter-group">
+
+<label>Status</label>
+
+<select id="statusFilter" aria-label="Filter by user status">
+
+<option value="">All</option>
+<option value="active">Active</option>
+<option value="blocked">Blocked</option>
+
+</select>
+
+</div>
+
+<div class="filter-actions">
+
+<button
+id="applyUserFilter"
+class="btn btn--outline">
+
+Apply
+
+</button>
+
+<button
+id="resetUserFilter"
+class="btn btn--outline">
+
+Reset
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- USER TABLE -->
+
+<section class="section">
+
+<div class="table-responsive card">
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Email</th>
+<th>Role</th>
+<th>Status</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="userTable">
+
+<tr>
+
+<td colspan="5" class="loading-state">
+
+Loading users...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<!-- EMPTY -->
+
+<div
+id="userEmpty"
+class="empty-state hidden">
+
+<h3>No users found</h3>
+
+<p>No matching users available.</p>
+
+</div>
+
+
+<!-- PAGINATION -->
+
+<div
+id="userPagination"
+class="pagination">
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
+<footer id="footer"></footer>
+
+<button
+id="topBtn"
+class="btn btn-circle hidden">
+
+↑
+
+</button>
+
+
+<!-- CORE -->
+
+<script src="js/core/storage.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/api.js"></script>
+
+<!-- UI -->
+
+<script src="js/ui/loader.js"></script>
+<script src="js/ui/navbar.js"></script>
+<script src="js/ui/theme.js"></script>
+<script src="js/ui/notifications.js"></script>
+
+<!-- MODULE -->
+
+<script src="js/modules/users.js"></script>
+
+<!-- MAIN -->
+
+<script src="js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+/* ===============================
+REMS RESPONSIVE SYSTEM
+=================================*/
+
+
+/* ===============================
+LARGE TABLETS / SMALL LAPTOP
+=================================*/
+
+@media (max-width:1200px){
+
+.container{
+max-width:95%;
+}
+
+}
+
+
+
+/* ===============================
+TABLETS
+=================================*/
+
+@media (max-width:1024px){
+
+.grid-3{
+grid-template-columns:repeat(2,1fr);
+}
+
+/* property grid */
+
+.property-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+/* dashboard */
+
+.dashboard-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+
+
+/* ===============================
+TABLET / SMALL SCREEN
+=================================*/
+
+@media (max-width:768px){
+
+/* property layout */
+
+.property-layout{
+grid-template-columns:1fr;
+}
+
+/* property grid */
+
+.property-grid{
+grid-template-columns:1fr;
+}
+
+/* dashboard */
+
+.dashboard-grid{
+grid-template-columns:1fr;
+}
+
+/* filter bars */
+
+.filter-bar{
+flex-direction:column;
+align-items:stretch;
+}
+
+/* search bar */
+
+.search-bar{
+grid-template-columns:1fr;
+}
+
+/* contact */
+
+.contact-grid{
+grid-template-columns:1fr;
+}
+
+/* hero */
+
+.hero-modern{
+padding:80px 0;
+}
+
+/* dashboard header */
+
+.dashboard-header{
+flex-direction:column;
+align-items:flex-start;
+gap:10px;
+}
+
+}
+
+
+
+/* ===============================
+PHONES
+=================================*/
+
+@media (max-width:600px){
+
+.auth-card{
+padding:var(--space-lg);
+}
+
+.quick-actions-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+
+
+/* ===============================
+SMALL PHONES
+=================================*/
+
+@media (max-width:480px){
+
+h1{
+font-size:28px;
+}
+
+h2{
+font-size:22px;
+}
+
+.container{
+width:95%;
+}
+
+/* property card */
+
+.property-card__price{
+font-size:18px;
+}
+
+/* buttons */
+
+.btn{
+width:100%;
+}
+
+}

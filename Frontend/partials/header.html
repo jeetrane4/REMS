@@ -1,0 +1,98 @@
+<div class="app-header">
+
+  <div class="container header__inner">
+
+    <!-- Logo -->
+    <a href="index.html" class="logo" aria-label="REMS Home">
+      REMS
+    </a>
+
+    <!-- Mobile Toggle -->
+    <button 
+      id="navToggle" 
+      class="nav-toggle" 
+      aria-label="Toggle Navigation"
+      aria-expanded="false"
+      aria-controls="mainNav"
+    >
+      ☰
+    </button>
+
+    <!-- Navigation -->
+    <nav id="mainNav" class="nav">
+
+      <a href="index.html">Home</a>
+      <a href="listings.html?type=buy">Buy</a>
+      <a href="listings.html?type=rent">Rent</a>
+      <a href="add-property.html">Sell</a>
+
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header__actions">
+
+      <a 
+        href="add-property.html" 
+        class="btn btn--primary hidden" 
+        id="postPropertyBtn">
+        Post Property
+      </a>
+
+      <a 
+        href="login.html" 
+        class="btn btn--outline"
+        id="loginBtn">
+        Login
+      </a>
+
+      <a 
+        href="register.html"
+        class="btn btn--primary"
+        id="registerBtn">
+        Register
+      </a>
+
+      <!-- Profile Dropdown -->
+      <div class="profile-dropdown hidden" id="profileMenu">
+
+        <button 
+          class="profile-btn"
+          id="profileToggle">
+
+          <span id="profileName">Account</span>
+          ▼
+
+        </button>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+
+          <a href="dashboard.html">Dashboard</a>
+          <a href="dashboard-properties.html" id="myListingsLink" class="hidden">My Listings</a>
+          <a href="bookings.html" id="myBookingsLink" class="hidden">My Bookings</a>
+          <a href="transactions.html">Transactions</a>
+          <a href="settings.html">Settings</a>
+          <a href="users.html" id="adminLink" class="hidden">Admin Panel</a>
+
+          <button id="logoutBtn" class="dropdown-logout">
+            Logout
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- Theme Toggle -->
+      <button 
+        id="themeToggle"
+        class="btn btn--ghost"
+        aria-label="Toggle Theme">
+
+        <span id="themeIcon">🌙</span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

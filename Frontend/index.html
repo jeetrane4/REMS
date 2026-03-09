@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>REMS | Smart Real Estate Platform</title>
+
+<meta name="description"
+content="REMS helps Buyers, Sellers and Agents connect securely. Search verified properties, book visits and close deals with confidence.">
+
+<link rel="canonical" href="https://rems.example.com/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="REMS – Real Estate Management System">
+<meta property="og:description" content="Search verified properties and close deals securely.">
+<meta property="og:type" content="website">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- CSS -->
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main>
+
+<!-- HERO -->
+<section class="hero hero-modern">
+
+<div class="hero-overlay"></div>
+
+<div class="container hero-content">
+
+<h1>Find Your Dream Property</h1>
+
+<p>Search verified listings and book properties with complete transparency.</p>
+
+<form id="searchForm" class="search-bar">
+
+<input type="text" id="city" placeholder="Enter City or Locality" required>
+
+<select id="type" aria-label="Property type">
+<option value="">Property Type</option>
+<option value="buy">Buy</option>
+<option value="rent">Rent</option>
+<option value="commercial">Commercial</option>
+</select>
+
+<select id="budget" aria-label="Property budget">
+<option value="">Budget</option>
+<option value="0-5000000">Under 50L</option>
+<option value="5000000-10000000">50L - 1Cr</option>
+<option value="10000000+">Above 1Cr</option>
+</select>
+
+<button type="submit" class="btn btn--primary">
+Search
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+<!-- PLATFORM STATS -->
+<section class="section section-light">
+
+<div class="container stats">
+
+<div class="stat">
+<h3 id="statProperties">0</h3>
+<p>Properties Listed</p>
+</div>
+
+<div class="stat">
+<h3 id="statUsers">0</h3>
+<p>Registered Users</p>
+</div>
+
+<div class="stat">
+<h3 id="statCities">0</h3>
+<p>Cities Covered</p>
+</div>
+
+</div>
+
+</section>
+
+<!-- FEATURED -->
+<section class="section">
+
+<div class="container">
+
+<div class="section-header">
+
+<h2>Featured Properties</h2>
+
+<a href="listings.html" class="btn btn--outline">
+View All
+</a>
+
+</div>
+
+<div id="featuredProperties" class="property-grid"></div>
+
+<div id="featuredLoader" class="loader"></div>
+
+</div>
+
+</section>
+
+<!-- RECOMMENDED -->
+<section class="section">
+
+<div class="container">
+
+<div class="section-header">
+<h2>Recommended For You</h2>
+</div>
+
+<div id="recommendedProperties" class="property-grid"></div>
+
+</div>
+
+</section>
+
+<!-- RECENT -->
+<section class="section">
+
+<div class="container">
+
+<div class="section-header">
+<h2>Recently Added</h2>
+</div>
+
+<div id="recentProperties" class="property-grid"></div>
+
+</div>
+
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+
+<div class="container center">
+
+<h2>List Your Property with REMS</h2>
+
+<p>Reach serious buyers and tenants faster.</p>
+
+<a href="register.html" class="btn btn--primary btn--large">
+Create Free Account
+</a>
+
+</div>
+
+</section>
+
+</main>
+
+<footer id="footer"></footer>
+
+<button id="topBtn" class="btn btn-circle hidden">
+↑
+</button>
+
+<!-- JS -->
+
+<script src="js/core/storage.js" defer></script>
+<script src="js/core/utils.js" defer></script>
+<script src="js/core/api.js" defer></script>
+
+<script src="js/ui/loader.js" defer></script>
+<script src="js/ui/navbar.js" defer></script>
+<script src="js/ui/theme.js" defer></script>
+<script src="js/ui/notifications.js" defer></script>
+
+<script src="js/modules/properties.js" defer></script>
+
+<script src="js/main.js" defer></script>
+
+</body>
+</html>

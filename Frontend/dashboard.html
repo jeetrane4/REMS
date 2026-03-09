@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard – REMS</title>
+
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main class="dashboard-page">
+
+<div class="container">
+
+<!-- HEADER -->
+
+<div class="dashboard-header">
+
+<div>
+
+<h1 id="dashboardTitle">Dashboard</h1>
+
+<p id="dashboardSubtitle" class="muted-text"></p>
+
+</div>
+
+<div id="dashboardActions" class="dashboard-actions">
+
+<a href="add-property.html"
+class="btn btn--primary"
+data-role="seller">
+
++ Add Property
+
+</a>
+
+<a href="dashboard-properties.html"
+class="btn btn--outline"
+data-role="seller">
+
+Manage Properties
+
+</a>
+
+</div>
+
+</div>
+
+
+<!-- STATS -->
+
+<section class="section">
+
+<div
+id="dashboardSummary"
+class="dashboard-grid">
+
+<div class="dashboard-card skeleton"></div>
+<div class="dashboard-card skeleton"></div>
+<div class="dashboard-card skeleton"></div>
+<div class="dashboard-card skeleton"></div>
+
+</div>
+
+</section>
+
+
+<!-- QUICK ACTIONS -->
+
+<section class="section section--light">
+
+<div class="section__header">
+
+<h2>Quick Actions</h2>
+
+</div>
+
+<div class="quick-actions-grid">
+
+<a href="listings.html"
+class="card quick-action"
+data-role="buyer">
+
+<h3>Browse Properties</h3>
+
+<p class="muted-text">
+
+Find homes to buy or rent
+
+</p>
+
+</a>
+
+<a href="bookings.html"
+class="card quick-action"
+data-role="buyer">
+
+<h3>My Bookings</h3>
+
+<p class="muted-text">
+
+View scheduled visits
+
+</p>
+
+</a>
+
+<a href="add-property.html"
+class="card quick-action"
+data-role="seller">
+
+<h3>Add Property</h3>
+
+<p class="muted-text">
+
+List new property
+
+</p>
+
+</a>
+
+<a href="transactions.html"
+class="card quick-action">
+
+<h3>Transactions</h3>
+
+<p class="muted-text">
+
+View payment history
+
+</p>
+
+</a>
+
+<a href="settings.html"
+class="card quick-action">
+
+<h3>Settings</h3>
+
+<p class="muted-text">
+
+Update profile
+
+</p>
+
+</a>
+
+</div>
+
+</section>
+
+
+<!-- RECENT ACTIVITY -->
+
+<section class="section">
+
+<div class="section__header">
+
+<h2>Recent Activity</h2>
+
+</div>
+
+<div
+id="recentActivity"
+class="card activity-list">
+
+<div class="activity-loading">
+
+Loading activity...
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
+<footer id="footer"></footer>
+
+<button id="topBtn" class="btn btn-circle hidden">
+
+↑
+
+</button>
+
+
+<!-- CORE -->
+
+<script src="js/core/storage.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/api.js"></script>
+
+<!-- UI -->
+
+<script src="js/ui/loader.js"></script>
+<script src="js/ui/navbar.js"></script>
+<script src="js/ui/theme.js"></script>
+<script src="js/ui/notifications.js"></script>
+
+<!-- MODULES -->
+
+<script src="js/modules/dashboard.js"></script>
+<script src="js/modules/booking.js"></script>
+
+<!-- MAIN -->
+
+<script src="js/main.js"></script>
+
+</body>
+</html>

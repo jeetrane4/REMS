@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Contact REMS | Support</title>
+
+<meta name="description"
+content="Contact the REMS support team for assistance with properties, bookings or transactions.">
+
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/pages.css">
+
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main>
+
+<section class="section">
+
+<div class="container">
+
+<h1>Contact Us</h1>
+
+<p class="muted-text">
+Have questions about properties, bookings or payments?
+Our support team is here to help.
+</p>
+
+
+<!-- CONTACT INFO -->
+
+<div class="contact-grid">
+
+<div class="card contact-info">
+
+<h3>Support Information</h3>
+
+<p><strong>Email:</strong> support@rems.com</p>
+<p><strong>Phone:</strong> +91 99999 99999</p>
+<p><strong>Location:</strong> Gujarat, India</p>
+
+<p class="muted-text small">
+Support Hours: Mon–Sat 9:00 AM – 6:00 PM
+</p>
+
+</div>
+
+
+<!-- CONTACT FORM -->
+
+<div class="card">
+
+<form id="contactForm" class="form-grid">
+
+<div class="form-group">
+
+<label for="name">Full Name</label>
+
+<input
+type="text"
+id="name"
+name="name"
+placeholder="Enter your name"
+required
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label for="email">Email Address</label>
+
+<input
+type="email"
+id="email"
+name="email"
+placeholder="Enter your email"
+required
+>
+
+</div>
+
+
+<div class="form-group">
+
+<label for="message">Message</label>
+
+<textarea
+id="message"
+name="message"
+rows="5"
+placeholder="Write your message"
+required
+></textarea>
+
+</div>
+
+
+<div class="form-actions">
+
+<button
+type="submit"
+class="btn btn--primary"
+>
+
+Send Message
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+<footer id="footer"></footer>
+
+
+<!-- CORE -->
+
+<script src="js/core/storage.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/api.js"></script>
+
+<!-- UI -->
+
+<script src="js/ui/loader.js"></script>
+<script src="js/ui/notifications.js"></script>
+<script src="js/ui/theme.js"></script>
+<script src="js/ui/navbar.js"></script>
+<script src="js/ui/modals.js"></script>
+
+
+<!-- CONTACT FORM SCRIPT -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+const form = document.getElementById("contactForm");
+
+if(!form) return;
+
+form.addEventListener("submit", async (e)=>{
+
+e.preventDefault();
+
+const data = Object.fromEntries(new FormData(form));
+
+try{
+
+showLoader();
+
+await apiRequest("/contact","POST",data);
+
+notify("Message sent successfully","success");
+
+form.reset();
+
+}
+catch(err){
+
+notify("Failed to send message","error");
+
+}
+finally{
+
+hideLoader();
+
+}
+
+});
+
+});
+
+</script>
+
+
+<!-- MAIN -->
+
+<script src="js/main.js"></script>
+
+</body>
+</html>

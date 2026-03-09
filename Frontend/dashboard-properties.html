@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Manage Properties – REMS</title>
+
+<meta name="description"
+content="Manage your listed properties and track their status">
+
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/navigation.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main class="section dashboard-page">
+
+<div class="container">
+
+<!-- PAGE HEADER -->
+
+<div class="dashboard-header">
+
+<div>
+
+<h1>Manage Properties</h1>
+
+<p class="muted-text">
+
+View and manage your property listings
+
+</p>
+
+</div>
+
+<div class="dashboard-actions">
+
+<a
+href="add-property.html"
+class="btn btn--primary">
+
++ Add Property
+
+</a>
+
+</div>
+
+</div>
+
+
+<!-- FILTER BAR -->
+
+<div class="card filter-bar">
+
+<div class="filter-group">
+
+<label>Search</label>
+
+<input
+type="text"
+id="searchProperty"
+placeholder="Search property">
+
+</div>
+
+<div class="filter-group">
+
+<label>Status</label>
+
+<select id="statusFilter" aria-label="Filter by property status">
+
+<option value="">All</option>
+<option value="Available">Available</option>
+<option value="Sold">Sold</option>
+<option value="Rented">Rented</option>
+
+</select>
+
+</div>
+
+<div class="filter-actions">
+
+<button
+id="applyPropertyFilter"
+class="btn btn--outline">
+
+Apply
+
+</button>
+
+<button
+id="resetPropertyFilter"
+class="btn btn--outline">
+
+Reset
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- SUMMARY -->
+
+<section class="section section-light">
+
+<div class="dashboard-grid">
+
+<div class="card summary-card">
+
+<h3 id="totalProperties">0</h3>
+
+<p>Total Properties</p>
+
+</div>
+
+<div class="card summary-card">
+
+<h3 id="activeProperties">0</h3>
+
+<p>Available</p>
+
+</div>
+
+<div class="card summary-card">
+
+<h3 id="soldProperties">0</h3>
+
+<p>Sold / Rented</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- PROPERTY LIST -->
+
+<section class="section">
+
+<div
+id="propertyList"
+class="property-grid">
+
+<div class="loading-state">
+
+Loading properties...
+
+</div>
+
+</div>
+
+<div
+id="propertyEmpty"
+class="empty-state hidden">
+
+<h3>No properties found</h3>
+
+<p>You haven't added any properties yet.</p>
+
+<a
+href="add-property.html"
+class="btn btn--primary">
+
+Add Property
+
+</a>
+
+</div>
+
+
+<!-- PAGINATION -->
+
+<div
+id="propertyPagination"
+class="pagination">
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
+<footer id="footer"></footer>
+
+<button
+id="topBtn"
+class="btn btn-circle hidden">
+
+↑
+
+</button>
+
+<!-- CORE -->
+
+<script src="js/core/storage.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/api.js"></script>
+
+<!-- UI -->
+
+<script src="js/ui/loader.js"></script>
+<script src="js/ui/navbar.js"></script>
+<script src="js/ui/theme.js"></script>
+<script src="js/ui/notifications.js"></script>
+
+<!-- MODULES -->
+
+<script src="js/modules/properties.js"></script>
+<script src="js/modules/dashboard.js"></script>
+
+<!-- MAIN -->
+
+<script src="js/main.js"></script>
+
+</body>
+</html>
