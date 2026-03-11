@@ -2,7 +2,7 @@
 // REMS API CLIENT (STABLE)
 // =============================
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://rems-3ist.onrender.com";
 
 async function apiRequest(endpoint, method = "GET", body = null) {
 
