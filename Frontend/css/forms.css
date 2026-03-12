@@ -215,15 +215,25 @@ width:auto;
 .checkbox-grid{
 
 display:grid;
-
 grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-
 gap:10px;
-
 margin-top:var(--space-sm);
-
 }
 
+.checkbox-grid label{
+display:flex;
+align-items:center;
+gap:8px;
+cursor:pointer;
+font-size:14px;
+}
+
+.checkbox-grid input[type="checkbox"]{
+width:16px;
+height:16px;
+margin:0;
+accent-color:var(--primary-color);
+}
 
 
 /* ===============================
