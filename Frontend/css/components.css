@@ -134,7 +134,7 @@ box-shadow var(--transition-fast);
 
 .property-card:hover{
 
-transform:translateY(-3px);
+transform:translateY(-5x);
 box-shadow:var(--shadow-md);
 
 }
