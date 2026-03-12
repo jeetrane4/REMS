@@ -86,16 +86,18 @@ exports.getPropertyById = async (req, res, next) => {
   try {
 
     const [rows] = await db.query(
-      `SELECT 
-        p.*, 
-        u.user_name AS owner_name,
-        pi.image_url AS image
-      FROM properties p
-      JOIN users u ON p.owner_id = u.user_id
-      LEFT JOIN property_images pi
-      ON p.property_id = pi.property_id
-      WHERE p.property_id = ?`,
-      [req.params.id]
+    `
+    SELECT 
+    p.*, 
+    u.user_name AS owner_name,
+    pi.image_url AS image
+    FROM properties p
+    JOIN users u ON p.owner_id = u.user_id
+    LEFT JOIN property_images pi
+    ON p.property_id = pi.property_id
+    WHERE p.property_id = ?
+    `,
+    [req.params.id]
     );
 
     if (rows.length === 0) {

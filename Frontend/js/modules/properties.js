@@ -295,12 +295,30 @@ RENDER PROPERTY DETAILS
 
 function renderPropertyDetails(property){
 
-  const container = document.getElementById("propertyDetails");
-  if(!container) return;
+const container = document.getElementById("propertyDetails");
+if(!container) return;
 
-  const id = property.property_id || property.id;
+const id = property.property_id || property.id;
 
-  container.innerHTML = `
+/* set gallery image */
+
+const gallery = document.getElementById("propertyGallery");
+
+if(gallery){
+
+gallery.innerHTML = `
+<div class="swiper-slide">
+<img
+src="${property.image || 'images/img1.jpg'}"
+alt="${escapeHTML(property.title)}"
+onerror="this.src='images/img1.jpg'"
+>
+</div>
+`;
+
+}
+
+container.innerHTML = `
 
 <h1>${escapeHTML(property.title)}</h1>
 
@@ -317,23 +335,21 @@ function renderPropertyDetails(property){
 
 `;
 
-  const price = document.getElementById("sidebarPrice");
-  const location = document.getElementById("sidebarLocation");
+const price = document.getElementById("sidebarPrice");
+const location = document.getElementById("sidebarLocation");
 
-  if(price) price.textContent = `₹${Number(property.price).toLocaleString()}`;
-  if(location) location.textContent = property.city;
+if(price) price.textContent = `₹${Number(property.price).toLocaleString()}`;
+if(location) location.textContent = property.city;
 
-  const saveBtn = document.getElementById("savePropertyBtn");
+const saveBtn = document.getElementById("savePropertyBtn");
 
-  if(saveBtn){
-    saveBtn.onclick = () => saveProperty(id);
-  }
+if(saveBtn){
+saveBtn.onclick = () => saveProperty(id);
+}
 
-  /* 🔴 IMPORTANT FIX — initialize booking AFTER property loads */
-
-  if(typeof initBooking === "function"){
-    initBooking(id);
-  }
+if(typeof initBooking === "function"){
+initBooking(id);
+}
 
 }
 
