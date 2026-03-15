@@ -21,13 +21,10 @@ content="View property price, images, amenities and location on REMS">
 <link rel="stylesheet" href="css/responsive.css">
 <link rel="stylesheet" href="css/pages.css">
 
-<link
-rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"
-/>
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-
 
 </head>
 
@@ -51,15 +48,16 @@ href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"
 
 <span>›</span>
 
-<span id="breadcrumbTitle">
-Property
-</span>
+<span id="breadcrumbTitle">Property</span>
 
 </nav>
 
+
 <div class="property-layout">
 
-<!-- MAIN CONTENT -->
+<!-- =========================
+MAIN CONTENT
+========================= -->
 
 <div class="property-main">
 
@@ -69,10 +67,10 @@ Property
 
 <div id="propertyGallery" class="swiper-wrapper">
 
+<!-- Images inserted dynamically -->
+
 <div class="swiper-slide">
-
 <img src="images/img1.webp" alt="Property image">
-
 </div>
 
 </div>
@@ -81,19 +79,17 @@ Property
 
 </div>
 
-<!-- DETAILS -->
 
-<div
-id="propertyDetails"
-class="property-details card">
+<!-- PROPERTY DETAILS -->
+
+<div id="propertyDetails" class="property-details card">
 
 <div class="loading-state">
-
 Loading property details...
-
 </div>
 
 </div>
+
 
 <!-- AMENITIES -->
 
@@ -101,55 +97,49 @@ Loading property details...
 
 <h3>Amenities</h3>
 
-<ul
-id="propertyAmenities"
-class="amenities-list">
+<ul id="propertyAmenities" class="amenities-list">
 
 <li class="muted-text">
-
 Loading amenities...
-
 </li>
 
 </ul>
 
 </section>
 
-<!-- SIDEBAR -->
+
+</div>
+
+
+<!-- =========================
+SIDEBAR
+========================= -->
 
 <aside class="property-sidebar">
 
 <div class="card sticky-card">
 
-<h3 id="sidebarPrice">
-₹ --
-</h3>
+<h3 id="sidebarPrice">₹ --</h3>
 
-<p id="sidebarLocation"
-class="muted-text">
-
+<p id="sidebarLocation" class="muted-text">
 Location
-
 </p>
 
-<button
-id="contactBtn"
+<button id="contactBtn"
 class="btn btn--primary btn--full">
 
 Contact Agent
 
 </button>
 
-<button
-id="bookVisitBtn"
+<button id="bookVisitBtn"
 class="btn btn--outline btn--full">
 
 Book Visit
 
 </button>
 
-<button
-id="savePropertyBtn"
+<button id="savePropertyBtn"
 class="btn btn--outline btn--full">
 
 ❤ Save Property
@@ -157,9 +147,7 @@ class="btn btn--outline btn--full">
 </button>
 
 <p class="muted-text small">
-
 Agent typically responds within 24 hours
-
 </p>
 
 </div>
@@ -168,34 +156,27 @@ Agent typically responds within 24 hours
 
 </div>
 
-<!-- SIMILAR PROPERTIES -->
+
+<!-- =========================
+SIMILAR PROPERTIES
+========================= -->
 
 <section class="section">
 
 <div class="section__header">
-
 <h3>Similar Properties</h3>
-
 </div>
 
-<div
-id="similarProperties"
-class="property-grid">
+<div id="similarProperties" class="property-grid">
 
 <div class="loading-state">
-
 Loading similar properties...
-
 </div>
 
 </div>
 
-<div
-id="similarEmpty"
-class="empty-state hidden">
-
+<div id="similarEmpty" class="empty-state hidden">
 No similar properties found.
-
 </div>
 
 </section>
@@ -204,23 +185,24 @@ No similar properties found.
 
 </main>
 
+
 <footer id="footer"></footer>
 
-<button
-id="topBtn"
-class="btn btn-circle hidden">
+<button id="topBtn" class="btn btn-circle hidden">↑</button>
 
-↑
 
-</button>
-
-<!-- CORE -->
+<!-- =========================
+CORE
+========================= -->
 
 <script src="js/core/storage.js"></script>
 <script src="js/core/utils.js"></script>
 <script src="js/core/api.js"></script>
 
-<!-- UI -->
+
+<!-- =========================
+UI
+========================= -->
 
 <script src="js/ui/loader.js"></script>
 <script src="js/ui/navbar.js"></script>
@@ -228,13 +210,22 @@ class="btn btn-circle hidden">
 <script src="js/ui/notifications.js"></script>
 <script src="js/ui/modals.js"></script>
 
-<!-- MODULES -->
+
+<!-- =========================
+MODULES
+========================= -->
 
 <script src="js/modules/properties.js"></script>
 <script src="js/modules/booking.js"></script>
 <script src="js/modules/transactions.js"></script>
+<script src="js/modules/reviews.js"></script>
+<script src="js/modules/loan.js"></script>
+<script src="js/modules/propertyMap.js"></script>
 
-<!-- MAIN -->
+
+<!-- =========================
+MAIN
+========================= -->
 
 <script src="js/main.js"></script>
 

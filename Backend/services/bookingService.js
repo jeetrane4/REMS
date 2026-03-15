@@ -1,14 +1,16 @@
-const db = require("../config/db");
+const query = require("../utils/dbQuery");
 
-exports.createBookingService = (property_id, buyer_id, seller_id) => {
-  return new Promise((resolve, reject) => {
-    db.query(
-      "INSERT INTO bookings (property_id, buyer_id, seller_id) VALUES (?, ?, ?)",
-      [property_id, buyer_id, seller_id],
-      (err, result) => {
-        if (err) reject(err);
-        else resolve(result.insertId);
-      }
-    );
-  });
+/* =============================
+CREATE BOOKING SERVICE
+============================= */
+
+exports.createBookingService = async (property_id, buyer_id) => {
+
+const booking = await query(
+"INSERT INTO bookings(property_id,user_id) VALUES($1,$2) RETURNING booking_id",
+[property_id,buyer_id]
+);
+
+return booking[0].booking_id;
+
 };

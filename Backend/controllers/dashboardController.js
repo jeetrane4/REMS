@@ -1,10 +1,4 @@
-const db = require("../config/db");
-
-/* ==============================
-DASHBOARD SUMMARY
-============================== */
-
-const db = require("../config/db");
+const query = require("../utils/dbQuery");
 
 /* =============================
 DASHBOARD STATS
@@ -21,92 +15,59 @@ let summary = {};
 
 if(role === "buyer"){
 
-const [[bookings]] = await db.query(
-"SELECT COUNT(*) AS totalBookings FROM bookings WHERE user_id=?",
+const bookings = await query(
+"SELECT COUNT(*) AS total_bookings FROM bookings WHERE user_id=$1",
 [userId]
 );
 
 summary = {
-totalBookings: bookings.totalBookings
+totalBookings: Number(bookings[0].total_bookings)
 };
 
 }
 
 else if(role === "seller" || role === "agent"){
 
-const [[properties]] = await db.query(
-"SELECT COUNT(*) AS totalProperties FROM properties WHERE owner_id=?",
+const properties = await query(
+"SELECT COUNT(*) AS total_properties FROM properties WHERE owner_id=$1",
 [userId]
 );
 
-const [[views]] = await db.query(
-"SELECT SUM(views) AS totalViews FROM properties WHERE owner_id=?",
+const views = await query(
+"SELECT COALESCE(SUM(views),0) AS total_views FROM properties WHERE owner_id=$1",
 [userId]
 );
 
 summary = {
-totalProperties: properties.totalProperties,
-totalViews: views.totalViews || 0
+totalProperties:Number(properties[0].total_properties),
+totalViews:Number(views[0].total_views)
 };
 
 }
 
 else if(role === "admin"){
 
-const [
-[[users]],
-[[properties]],
-[[bookings]]
-] = await Promise.all([
-db.query("SELECT COUNT(*) AS totalUsers FROM users"),
-db.query("SELECT COUNT(*) AS totalProperties FROM properties"),
-db.query("SELECT COUNT(*) AS totalBookings FROM bookings")
+const [users,properties,bookings] = await Promise.all([
+
+query("SELECT COUNT(*) AS total_users FROM users"),
+
+query("SELECT COUNT(*) AS total_properties FROM properties"),
+
+query("SELECT COUNT(*) AS total_bookings FROM bookings")
+
 ]);
 
 summary = {
-totalUsers: users.totalUsers,
-totalProperties: properties.totalProperties,
-totalBookings: bookings.totalBookings
+totalUsers:Number(users[0].total_users),
+totalProperties:Number(properties[0].total_properties),
+totalBookings:Number(bookings[0].total_bookings)
 };
 
 }
-
-res.json(summary);
-
-}
-catch(err){
-next(err);
-}
-
-};
-
-
-/* ==============================
-HOMEPAGE STATS
-============================== */
-
-exports.getHomepageStats = async (req,res,next)=>{
-
-try{
-
-const [
-[[properties]],
-[[users]],
-[[cities]]
-] = await Promise.all([
-
-db.query("SELECT COUNT(*) AS totalProperties FROM properties"),
-
-db.query("SELECT COUNT(*) AS totalUsers FROM users"),
-
-db.query("SELECT COUNT(DISTINCT city) AS totalCities FROM properties")
-
-]);
 
 res.json({
-totalProperties: properties.totalProperties,
-totalUsers: users.totalUsers,
-totalCities: cities.totalCities
+success:true,
+data:summary
 });
 
 }
@@ -117,9 +78,44 @@ next(err);
 };
 
 
-/* ==============================
+/* =============================
+HOMEPAGE STATS
+============================= */
+
+exports.getHomepageStats = async (req,res,next)=>{
+
+try{
+
+const [properties,users,cities] = await Promise.all([
+
+query("SELECT COUNT(*) AS total_properties FROM properties"),
+
+query("SELECT COUNT(*) AS total_users FROM users"),
+
+query("SELECT COUNT(DISTINCT city) AS total_cities FROM properties")
+
+]);
+
+res.json({
+success:true,
+data:{
+totalProperties:Number(properties[0].total_properties),
+totalUsers:Number(users[0].total_users),
+totalCities:Number(cities[0].total_cities)
+}
+});
+
+}
+catch(err){
+next(err);
+}
+
+};
+
+
+/* =============================
 RECENT ACTIVITY
-============================== */
+============================= */
 
 exports.getRecentActivity = async (req,res,next)=>{
 
@@ -143,7 +139,10 @@ time:"1 day ago"
 }
 ];
 
-res.json(activities);
+res.json({
+success:true,
+data:activities
+});
 
 }
 catch(err){

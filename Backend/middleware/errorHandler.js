@@ -1,6 +1,6 @@
 const errorHandler = (err, req, res, next) => {
 
-  console.error("Error:", err);
+  console.error("ERROR:", err);
 
   const status = err.status || 500;
 

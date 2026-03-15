@@ -38,7 +38,7 @@ router.post(
     body("role")
       .optional()
       .isIn(["buyer", "seller", "agent"])
-      .withMessage("Select valid role")
+      .withMessage("Invalid role")
   ],
   validate,
   authController.register
@@ -51,8 +51,13 @@ LOGIN
 router.post(
   "/login",
   [
-    body("email").isEmail().withMessage("Valid email required"),
-    body("password").notEmpty().withMessage("Password required")
+    body("email")
+      .isEmail()
+      .withMessage("Valid email required"),
+
+    body("password")
+      .notEmpty()
+      .withMessage("Password required")
   ],
   validate,
   authController.login
@@ -62,12 +67,6 @@ router.post(
 GET CURRENT USER
 ========================= */
 
-router.get(
-  "/me",
-  protect,
-  async (req,res)=>{
-    res.json(req.user);
-  }
-);
+router.get("/me", protect, authController.getCurrentUser);
 
 module.exports = router;

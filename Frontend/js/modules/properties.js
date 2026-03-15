@@ -234,6 +234,10 @@ class="btn btn--primary btn--small">
 View Details
 </a>
 
+<button onclick="toggleCompare(${id})" class="btn btn--outline btn--small">
+Compare
+</button>
+
 </div>
 
 </div>

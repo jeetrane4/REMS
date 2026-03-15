@@ -1,18 +1,21 @@
-const db = require("../config/db");
+const query = require("../utils/dbQuery");
 
 exports.sendMessage = async (req,res,next)=>{
 
 try{
 
-const {name,email,message} = req.body;
+const { name,email,message } = req.body;
 
-await db.query(
-`INSERT INTO contact_messages (name,email,message)
-VALUES (?,?,?)`,
+await query(
+`INSERT INTO contact_messages(name,email,message)
+VALUES($1,$2,$3)`,
 [name,email,message]
 );
 
-res.json({message:"Message received"});
+res.json({
+success:true,
+message:"Message received"
+});
 
 }
 catch(err){

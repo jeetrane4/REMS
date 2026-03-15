@@ -1,4 +1,4 @@
-const db = require("../config/db");
+const query = require("../utils/dbQuery");
 
 /* =============================
 CREATE PROPERTY
@@ -19,19 +19,22 @@ type,
 listing_type,
 bedrooms,
 bathrooms,
-area
+area,
+latitude,
+longitude
 } = req.body;
 
 if(!title || !price){
 return res.status(400).json({
+success:false,
 message:"Title and price required"
 });
 }
 
-await db.query(
+await query(
 `INSERT INTO properties
-(title,description,price,city,state,address,type,listing_type,bedrooms,bathrooms,area,owner_id)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+(title,description,price,city,state,address,type,listing_type,bedrooms,bathrooms,area,latitude,longitude,owner_id)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
 [
 title,
 description,
@@ -44,11 +47,14 @@ listing_type || "sale",
 bedrooms,
 bathrooms,
 area,
+latitude || null,
+longitude || null,
 req.user.id
 ]
 );
 
 res.status(201).json({
+success:true,
 message:"Property created successfully"
 });
 
@@ -58,6 +64,7 @@ next(err);
 }
 
 };
+
 
 
 /* =============================
@@ -71,62 +78,76 @@ try{
 const {
 city,
 type,
+listing_type,
 minPrice,
 maxPrice,
-listing_type,
 page = 1,
 limit = 10
 } = req.query;
 
-let query = `
+let baseQuery = `
 SELECT
 p.*,
 u.user_name AS owner_name,
-pi.image_url AS image
+(
+SELECT image_url
+FROM property_images
+WHERE property_id = p.property_id
+LIMIT 1
+) AS image
 FROM properties p
 JOIN users u ON p.owner_id = u.user_id
-LEFT JOIN property_images pi
-ON p.property_id = pi.property_id
 WHERE p.verification_status='approved'
 `;
 
 const params = [];
+let index = 1;
+
+/* FILTERS */
 
 if(city){
-query += " AND p.city=?";
+baseQuery += ` AND p.city=$${index++}`;
 params.push(city);
 }
 
 if(type){
-query += " AND p.type=?";
+baseQuery += ` AND p.type=$${index++}`;
 params.push(type);
 }
 
 if(listing_type){
-query += " AND p.listing_type=?";
+baseQuery += ` AND p.listing_type=$${index++}`;
 params.push(listing_type);
 }
 
 if(minPrice){
-query += " AND p.price>=?";
+baseQuery += ` AND p.price >= $${index++}`;
 params.push(minPrice);
 }
 
 if(maxPrice){
-query += " AND p.price<=?";
+baseQuery += ` AND p.price <= $${index++}`;
 params.push(maxPrice);
 }
 
-query += " ORDER BY p.listed_at DESC";
+/* PAGINATION */
 
-query += " LIMIT ? OFFSET ?";
+const offset = (page - 1) * limit;
 
-params.push(parseInt(limit));
-params.push((page-1)*limit);
+baseQuery += ` ORDER BY p.listed_at DESC
+LIMIT $${index++}
+OFFSET $${index++}`;
 
-const [properties] = await db.query(query,params);
+params.push(limit);
+params.push(offset);
 
-res.json(properties);
+const properties = await query(baseQuery,params);
+
+res.json({
+success:true,
+count:properties.length,
+data:properties
+});
 
 }
 catch(err){
@@ -134,6 +155,7 @@ next(err);
 }
 
 };
+
 
 
 /* =============================
@@ -146,38 +168,47 @@ try{
 
 const id = req.params.id;
 
-const [rows] = await db.query(
+const rows = await query(
 `
 SELECT
 p.*,
-u.user_name AS owner_name
+u.user_name AS owner_name,
+u.user_email AS owner_email
 FROM properties p
 JOIN users u ON p.owner_id = u.user_id
-WHERE p.property_id=?
+WHERE p.property_id=$1
 `,
 [id]
 );
 
 if(rows.length === 0){
 return res.status(404).json({
+success:false,
 message:"Property not found"
 });
 }
 
-await db.query(
-"UPDATE properties SET views = views + 1 WHERE property_id=?",
+/* increase view counter */
+
+await query(
+"UPDATE properties SET views = views + 1 WHERE property_id=$1",
 [id]
 );
 
-const [images] = await db.query(
-"SELECT image_url FROM property_images WHERE property_id=?",
+/* get images */
+
+const images = await query(
+"SELECT image_url FROM property_images WHERE property_id=$1",
 [id]
 );
 
 const property = rows[0];
 property.images = images;
 
-res.json(property);
+res.json({
+success:true,
+data:property
+});
 
 }
 catch(err){
@@ -185,6 +216,7 @@ next(err);
 }
 
 };
+
 
 
 /* =============================
@@ -197,19 +229,21 @@ try{
 
 const propertyId = req.params.id;
 
-const [rows] = await db.query(
-"SELECT owner_id FROM properties WHERE property_id=?",
+const rows = await query(
+"SELECT owner_id FROM properties WHERE property_id=$1",
 [propertyId]
 );
 
 if(rows.length === 0){
 return res.status(404).json({
+success:false,
 message:"Property not found"
 });
 }
 
 if(rows[0].owner_id !== req.user.id){
 return res.status(403).json({
+success:false,
 message:"Not allowed"
 });
 }
@@ -224,10 +258,16 @@ address,
 type
 } = req.body;
 
-await db.query(
+await query(
 `UPDATE properties
-SET title=?,description=?,price=?,city=?,state=?,address=?,type=?
-WHERE property_id=?`,
+SET title=$1,
+description=$2,
+price=$3,
+city=$4,
+state=$5,
+address=$6,
+type=$7
+WHERE property_id=$8`,
 [
 title,
 description,
@@ -241,6 +281,7 @@ propertyId
 );
 
 res.json({
+success:true,
 message:"Property updated"
 });
 
@@ -250,6 +291,7 @@ next(err);
 }
 
 };
+
 
 
 /* =============================
@@ -262,12 +304,13 @@ try{
 
 const propertyId = req.params.id;
 
-await db.query(
-"DELETE FROM properties WHERE property_id=?",
+await query(
+"DELETE FROM properties WHERE property_id=$1",
 [propertyId]
 );
 
 res.json({
+success:true,
 message:"Property deleted"
 });
 

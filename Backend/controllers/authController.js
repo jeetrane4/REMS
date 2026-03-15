@@ -1,49 +1,52 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const db = require("../config/db");
+const query = require("../utils/dbQuery");
+const otpService = require("../services/otpService");
 
 /* =========================
 REGISTER USER
 ========================= */
 
 exports.register = async (req, res, next) => {
+
   try {
 
     const { name, email, mobile, password, role } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "Name, email and password required"
-      });
-    }
-
-    const [existing] = await db.query(
-      "SELECT user_id FROM users WHERE user_email=?",
+    const existing = await query(
+      "SELECT user_id FROM users WHERE user_email=$1",
       [email]
     );
 
     if (existing.length > 0) {
       return res.status(400).json({
+        success: false,
         message: "Email already registered"
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [result] = await db.query(
+    const users = await query(
       `INSERT INTO users
       (user_name,user_email,user_mobile,password,role)
-      VALUES (?,?,?,?,?)`,
-      [name,email,mobile,hashedPassword,role || "buyer"]
+      VALUES ($1,$2,$3,$4,$5)
+      RETURNING user_id`,
+      [name, email, mobile, hashedPassword, role || "buyer"]
     );
 
+    const otp = otpService.generateOTP();
+    await otpService.saveOTP(users[0].user_id, mobile, otp);
+    console.log("OTP:", otp);
+
     const token = jwt.sign(
-      { id: result.insertId, role: role || "buyer" },
+      { id: users[0].user_id, role: role || "buyer" },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
     res.status(201).json({
+      success: true,
       message: "User registered successfully",
       token
     });
@@ -51,11 +54,12 @@ exports.register = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 };
 
 
 /* =========================
-LOGIN
+LOGIN USER
 ========================= */
 
 exports.login = async (req,res,next)=>{
@@ -64,35 +68,25 @@ try{
 
 const { email,password } = req.body;
 
-if(!email || !password){
-return res.status(400).json({
-message:"Email and password required"
-});
-}
-
-const [users] = await db.query(
-"SELECT * FROM users WHERE user_email=?",
+const users = await query(
+"SELECT * FROM users WHERE user_email=$1",
 [email]
 );
 
 if(users.length === 0){
 return res.status(401).json({
+success:false,
 message:"Invalid credentials"
 });
 }
 
 const user = users[0];
 
-if(!user.is_active){
-return res.status(403).json({
-message:"Account disabled"
-});
-}
-
 const match = await bcrypt.compare(password,user.password);
 
 if(!match){
 return res.status(401).json({
+success:false,
 message:"Invalid credentials"
 });
 }
@@ -104,6 +98,7 @@ process.env.JWT_SECRET,
 );
 
 res.json({
+success:true,
 token,
 user:{
 id:user.user_id,
@@ -112,6 +107,46 @@ email:user.user_email,
 mobile:user.user_mobile,
 role:user.role
 }
+});
+
+}
+catch(err){
+next(err);
+}
+
+};
+
+
+/* =========================
+GET CURRENT USER
+========================= */
+
+exports.getCurrentUser = async (req,res,next)=>{
+
+try{
+
+const users = await query(
+`SELECT
+user_id,
+user_name,
+user_email,
+user_mobile,
+role
+FROM users
+WHERE user_id=$1`,
+[req.user.id]
+);
+
+if(users.length === 0){
+return res.status(404).json({
+success:false,
+message:"User not found"
+});
+}
+
+res.json({
+success:true,
+user:users[0]
 });
 
 }

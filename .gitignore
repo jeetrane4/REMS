@@ -3,3 +3,4 @@ Backend/.env
 uploads/
 .DS_Store
 .vscode/
+.env

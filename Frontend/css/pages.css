@@ -299,3 +299,9 @@ border-radius:var(--radius-md);
 overflow:hidden;
 margin-top:10px;
 }
+
+#propertyMap{
+height:500px;
+width:100%;
+border-radius:12px;
+}

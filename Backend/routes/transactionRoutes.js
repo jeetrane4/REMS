@@ -2,30 +2,41 @@ const express = require("express");
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
-const role = require("../middleware/roleMiddleware");
+const authorize = require("../middleware/roleMiddleware");
+
 const transactionController = require("../controllers/transactionController");
 
-// Create transaction (admin only)
+/* =========================
+CREATE TRANSACTION
+========================= */
+
 router.post(
-  "/",
-  protect,
-  role(["admin"]),
-  transactionController.createTransaction
+"/",
+protect,
+authorize(["admin"]),
+transactionController.createTransaction
 );
 
-// Get all transactions (admin only)
+/* =========================
+GET TRANSACTIONS
+========================= */
+
 router.get(
-  "/",
-  protect,
-  transactionController.getTransactions
+"/",
+protect,
+authorize(["admin","buyer","seller"]),
+transactionController.getTransactions
 );
 
-// Update transaction status (admin only)
+/* =========================
+UPDATE TRANSACTION STATUS
+========================= */
+
 router.put(
-  "/:id",
-  protect,
-  role(["admin"]),
-  transactionController.updateTransactionStatus
+"/:id",
+protect,
+authorize(["admin"]),
+transactionController.updateTransactionStatus
 );
 
 module.exports = router;

@@ -1,35 +1,58 @@
-const db = require("../config/db");
+const query = require("../utils/dbQuery");
 
-exports.getNotifications = async (req, res, next) => {
-  try {
+/* =============================
+GET USER NOTIFICATIONS
+============================= */
 
-    const user_id = req.user.id;
+exports.getNotifications = async (req,res,next)=>{
 
-    const [notifications] = await db.query(
-      "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC",
-      [user_id]
-    );
+try{
 
-    res.json(notifications);
+const notifications = await query(
+`SELECT *
+FROM notifications
+WHERE user_id=$1
+ORDER BY created_at DESC`,
+[req.user.id]
+);
 
-  } catch (err) {
-    next(err);
-  }
+res.json({
+success:true,
+count:notifications.length,
+data:notifications
+});
+
+}
+catch(err){
+next(err);
+}
+
 };
 
-exports.markAsRead = async (req, res, next) => {
-  try {
 
-    const { notification_id } = req.params;
+/* =============================
+MARK NOTIFICATION AS READ
+============================= */
 
-    await db.query(
-      "UPDATE notifications SET is_read = TRUE WHERE notification_id = ?",
-      [notification_id]
-    );
+exports.markAsRead = async (req,res,next)=>{
 
-    res.json({ message: "Notification marked as read" });
+try{
 
-  } catch (err) {
-    next(err);
-  }
+const { notification_id } = req.params;
+
+await query(
+"UPDATE notifications SET is_read=true WHERE notification_id=$1",
+[notification_id]
+);
+
+res.json({
+success:true,
+message:"Notification marked as read"
+});
+
+}
+catch(err){
+next(err);
+}
+
 };

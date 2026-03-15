@@ -3,14 +3,10 @@ const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
 const controller = require("../controllers/savedPropertyController");
+const role = require("../middleware/roleMiddleware");
 
-// save property
-router.post("/", protect, controller.saveProperty);
-
-// get saved properties
+router.post("/", protect, role(["buyer"]), controller.saveProperty);
 router.get("/", protect, controller.getSavedProperties);
-
-// remove saved property
 router.delete("/:property_id", protect, controller.removeSavedProperty);
 
 module.exports = router;

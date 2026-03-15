@@ -94,15 +94,24 @@ return;
 
 }
 
-table.innerHTML = list.map(t => `
+table.innerHTML = list.map(t => {
+
+const propertyTitle = t.title || "Property";
+const buyer = t.user_name || t.buyer || "User";
+
+return `
 
 <tr>
 
 <td>${t.transaction_id}</td>
 
-<td>${escapeHTML(t.title || "Property")}</td>
+<td>
+<a href="listing-details.html?id=${t.property_id}" class="table-link">
+${escapeHTML(propertyTitle)}
+</a>
+</td>
 
-<td>${escapeHTML(t.user_name || "User")}</td>
+<td>${escapeHTML(buyer)}</td>
 
 <td>${formatCurrency(t.amount)}</td>
 
@@ -110,13 +119,15 @@ table.innerHTML = list.map(t => `
 
 <td>
 <span class="badge ${getStatusClass(t.payment_status)}">
-${escapeHTML(t.payment_status)}
+${escapeHTML(t.payment_status || "pending")}
 </span>
 </td>
 
 </tr>
 
-`).join("");
+`;
+
+}).join("");
 
 }
 
@@ -163,7 +174,8 @@ if(search){
 filtered = filtered.filter(t =>
 
 (t.title || "").toLowerCase().includes(search) ||
-(t.user_name || "").toLowerCase().includes(search)
+(t.user_name || "").toLowerCase().includes(search) ||
+(t.buyer || "").toLowerCase().includes(search)
 
 );
 
@@ -196,6 +208,8 @@ if(status === "completed") return "badge--sale";
 if(status === "pending") return "badge--rent";
 
 if(status === "failed") return "badge--featured";
+
+if(status === "cancelled") return "badge--error";
 
 return "";
 
