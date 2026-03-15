@@ -1,12 +1,16 @@
 // =============================
-// REMS API CLIENT (STABLE)
+// REMS API CLIENT (UPGRADED)
 // =============================
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = window.API_BASE || "http://localhost:5000/api";
 
-async function apiRequest(endpoint, method = "GET", body = null) {
+/* =============================
+CORE REQUEST ENGINE
+============================= */
 
-  const token = Storage?.getToken ? Storage.getToken() : null;
+async function apiRequest(endpoint, method = "GET", body = null, retries = 1) {
+
+  const token = Storage?.getToken?.();
 
   const headers = {
     "Content-Type": "application/json"
@@ -32,8 +36,7 @@ async function apiRequest(endpoint, method = "GET", body = null) {
     let data = null;
 
     try {
-      const text = await response.text();
-      data = text ? JSON.parse(text) : null;
+      data = await response.json();
     } catch {
       data = null;
     }
@@ -48,11 +51,10 @@ async function apiRequest(endpoint, method = "GET", body = null) {
 
         setTimeout(() => {
           window.location.href = "login.html";
-        }, 1200);
-
+        }, 1000);
       }
 
-      throw new Error(data?.message || `Request failed (${response.status})`);
+      throw new Error(data?.message || `API error (${response.status})`);
     }
 
     return data;
@@ -61,10 +63,33 @@ async function apiRequest(endpoint, method = "GET", body = null) {
 
     console.error("API ERROR:", error);
 
-    if (typeof notify === "function") {
-      notify(error.message || "Network error", "error");
+    if (retries > 0) {
+      return apiRequest(endpoint, method, body, retries - 1);
     }
+
+    notify?.(error.message || "Network error", "error");
 
     throw error;
   }
 }
+
+/* =============================
+API SHORTCUTS
+============================= */
+
+const API = {
+
+  get: (url) => apiRequest(url),
+
+  post: (url, data) => apiRequest(url, "POST", data),
+
+  put: (url, data) => apiRequest(url, "PUT", data),
+
+  delete: (url) => apiRequest(url, "DELETE")
+
+};
+
+/* expose globally */
+
+window.apiRequest = apiRequest;
+window.API = API;

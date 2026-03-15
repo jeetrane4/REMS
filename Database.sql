@@ -23,25 +23,37 @@ CREATE TABLE users (
 -- =============================
 CREATE TABLE properties (
 property_id INT AUTO_INCREMENT PRIMARY KEY,
+
 owner_id INT NOT NULL,
 
 title VARCHAR(200) NOT NULL,
 description TEXT,
 
-type ENUM('house','apartment','villa','commercial') NOT NULL,
+type ENUM('house','apartment','villa','commercial'),
+
+listing_type ENUM('sale','rent') DEFAULT 'sale',
+
+bedrooms INT,
+bathrooms INT,
+area INT,
 
 address VARCHAR(255),
 city VARCHAR(100),
 state VARCHAR(100),
+pincode VARCHAR(20),
 
-price DECIMAL(12,2) NOT NULL,
+price DECIMAL(12,2),
 
 status ENUM('available','sold','rented') DEFAULT 'available',
+
+verification_status ENUM('pending','approved','rejected') DEFAULT 'pending',
 
 amenities JSON,
 
 latitude DECIMAL(10,8),
 longitude DECIMAL(11,8),
+
+views INT DEFAULT 0,
 
 listed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -59,6 +71,31 @@ CREATE TABLE property_images (
     FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- =============================
+-- PROPERTY documents
+-- =============================
+CREATE TABLE property_documents (
+id INT AUTO_INCREMENT PRIMARY KEY,
+property_id INT,
+document_type VARCHAR(100),
+document_url VARCHAR(255),
+status ENUM('pending','approved','rejected') DEFAULT 'pending',
+
+FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE
+);
+
+-- =============================
+-- User documents
+-- =============================
+CREATE TABLE user_documents (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT,
+document_type VARCHAR(50),
+document_url VARCHAR(255),
+status ENUM('pending','approved','rejected') DEFAULT 'pending',
+
+FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
 -- =============================
 -- BOOKINGS
@@ -142,6 +179,20 @@ message TEXT,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =============================
+-- REVIEWS
+-- =============================
+CREATE TABLE reviews (
+review_id INT AUTO_INCREMENT PRIMARY KEY,
+property_id INT,
+user_id INT,
+rating INT,
+comment TEXT,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+FOREIGN KEY (property_id) REFERENCES properties(property_id),
+FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
 -- =============================
 -- INDEXES (FOR SEARCH PERFORMANCE)

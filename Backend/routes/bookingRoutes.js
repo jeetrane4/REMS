@@ -6,6 +6,10 @@ const role = require("../middleware/roleMiddleware");
 
 const bookingController = require("../controllers/bookingController");
 
+/* =========================
+CREATE BOOKING
+========================= */
+
 router.post(
   "/",
   protect,
@@ -13,12 +17,20 @@ router.post(
   bookingController.createBooking
 );
 
+/* =========================
+UPDATE BOOKING STATUS
+========================= */
+
 router.put(
   "/:booking_id",
   protect,
-  role(["admin","seller"]),
+  role(["admin","seller","agent"]),
   bookingController.updateBookingStatus
 );
+
+/* =========================
+GET BOOKINGS
+========================= */
 
 router.get(
   "/",

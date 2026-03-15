@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
+
 const dashboardController = require("../controllers/dashboardController");
 
 /* =========================
-Dashboard Summary
+DASHBOARD STATS
 ========================= */
 
 router.get(
@@ -15,17 +16,16 @@ router.get(
 );
 
 /* =========================
-Homepage Stats (Landing Page)
+HOMEPAGE STATS
 ========================= */
 
 router.get(
   "/stats",
-  protect,
   dashboardController.getHomepageStats
 );
 
 /* =========================
-Recent Activity
+RECENT ACTIVITY
 ========================= */
 
 router.get(

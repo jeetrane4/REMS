@@ -4,9 +4,15 @@ const db = require("../config/db");
 DASHBOARD SUMMARY
 ============================== */
 
-exports.getDashboardStats = async (req, res, next) => {
+const db = require("../config/db");
 
-try {
+/* =============================
+DASHBOARD STATS
+============================= */
+
+exports.getDashboardStats = async (req,res,next)=>{
+
+try{
 
 const userId = req.user.id;
 const role = req.user.role;
@@ -20,14 +26,8 @@ const [[bookings]] = await db.query(
 [userId]
 );
 
-const [[saved]] = await db.query(
-"SELECT COUNT(*) AS savedProperties FROM saved_properties WHERE user_id=?",
-[userId]
-);
-
 summary = {
-totalBookings: bookings.totalBookings,
-savedProperties: saved.savedProperties
+totalBookings: bookings.totalBookings
 };
 
 }
@@ -39,23 +39,14 @@ const [[properties]] = await db.query(
 [userId]
 );
 
-const [[bookings]] = await db.query(
-`SELECT COUNT(*) AS totalBookings 
-FROM bookings b
-JOIN properties p ON b.property_id = p.property_id
-WHERE p.owner_id=?`,
-[userId]
-);
-
-const [[transactions]] = await db.query(
-"SELECT COUNT(*) AS totalTransactions FROM transactions WHERE seller_id=?",
+const [[views]] = await db.query(
+"SELECT SUM(views) AS totalViews FROM properties WHERE owner_id=?",
 [userId]
 );
 
 summary = {
 totalProperties: properties.totalProperties,
-totalBookings: bookings.totalBookings,
-totalTransactions: transactions.totalTransactions
+totalViews: views.totalViews || 0
 };
 
 }
@@ -65,20 +56,17 @@ else if(role === "admin"){
 const [
 [[users]],
 [[properties]],
-[[bookings]],
-[[transactions]]
+[[bookings]]
 ] = await Promise.all([
 db.query("SELECT COUNT(*) AS totalUsers FROM users"),
 db.query("SELECT COUNT(*) AS totalProperties FROM properties"),
-db.query("SELECT COUNT(*) AS totalBookings FROM bookings"),
-db.query("SELECT COUNT(*) AS totalTransactions FROM transactions")
+db.query("SELECT COUNT(*) AS totalBookings FROM bookings")
 ]);
 
 summary = {
 totalUsers: users.totalUsers,
 totalProperties: properties.totalProperties,
-totalBookings: bookings.totalBookings,
-totalTransactions: transactions.totalTransactions
+totalBookings: bookings.totalBookings
 };
 
 }

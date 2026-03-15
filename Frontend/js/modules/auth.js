@@ -67,8 +67,8 @@ showLoader();
 
 const res = await apiRequest("/auth/login","POST",data);
 
-if(!res?.token || !res?.user){
-throw new Error("Invalid server response");
+if(!res|| !res.token){
+throw new Error("Login Failed");
 }
 
 Storage.setToken(res.token);

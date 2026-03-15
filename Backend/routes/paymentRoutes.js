@@ -3,9 +3,13 @@ const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
 const role = require("../middleware/roleMiddleware");
+
 const paymentController = require("../controllers/paymentController");
 
-// Create payment (admin only)
+/* =========================
+CREATE PAYMENT
+========================= */
+
 router.post(
   "/",
   protect,
@@ -13,7 +17,10 @@ router.post(
   paymentController.createPayment
 );
 
-// Get all payments (admin only)
+/* =========================
+GET PAYMENTS
+========================= */
+
 router.get(
   "/",
   protect,

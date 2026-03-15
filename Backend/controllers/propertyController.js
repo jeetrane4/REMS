@@ -4,113 +4,186 @@ const db = require("../config/db");
 CREATE PROPERTY
 ============================= */
 
-exports.createProperty = async (req, res, next) => {
-  try {
-    const { title, description, price, city, state, address, type } = req.body;
+exports.createProperty = async (req,res,next)=>{
 
-    await db.query(
-      `INSERT INTO properties 
-      (title, description, price, city, state, address, type, owner_id) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [title, description, price, city, state, address, type, req.user.id]
-    );
+try{
 
-    res.status(201).json({
-      message: "Property created successfully"
-    });
+const {
+title,
+description,
+price,
+city,
+state,
+address,
+type,
+listing_type,
+bedrooms,
+bathrooms,
+area
+} = req.body;
 
-  } catch (err) {
-    next(err);
-  }
+if(!title || !price){
+return res.status(400).json({
+message:"Title and price required"
+});
+}
+
+await db.query(
+`INSERT INTO properties
+(title,description,price,city,state,address,type,listing_type,bedrooms,bathrooms,area,owner_id)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+[
+title,
+description,
+price,
+city,
+state,
+address,
+type,
+listing_type || "sale",
+bedrooms,
+bathrooms,
+area,
+req.user.id
+]
+);
+
+res.status(201).json({
+message:"Property created successfully"
+});
+
+}
+catch(err){
+next(err);
+}
+
 };
 
 
 /* =============================
-GET ALL PROPERTIES
+GET PROPERTIES
 ============================= */
 
-exports.getProperties = async (req, res, next) => {
-  try {
+exports.getProperties = async (req,res,next)=>{
 
-    const { city, type, minPrice, maxPrice } = req.query;
+try{
 
-    let query = `
-      SELECT 
-        p.*, 
-        u.user_name AS owner_name,
-        pi.image_url AS image
-      FROM properties p
-      JOIN users u ON p.owner_id = u.user_id
-      LEFT JOIN property_images pi 
-      ON p.property_id = pi.property_id
-      WHERE 1=1
-    `;
+const {
+city,
+type,
+minPrice,
+maxPrice,
+listing_type,
+page = 1,
+limit = 10
+} = req.query;
 
-    const params = [];
+let query = `
+SELECT
+p.*,
+u.user_name AS owner_name,
+pi.image_url AS image
+FROM properties p
+JOIN users u ON p.owner_id = u.user_id
+LEFT JOIN property_images pi
+ON p.property_id = pi.property_id
+WHERE p.verification_status='approved'
+`;
 
-    if (city) {
-      query += " AND p.city = ?";
-      params.push(city);
-    }
+const params = [];
 
-    if (type) {
-      query += " AND p.type = ?";
-      params.push(type);
-    }
+if(city){
+query += " AND p.city=?";
+params.push(city);
+}
 
-    if (minPrice) {
-      query += " AND p.price >= ?";
-      params.push(minPrice);
-    }
+if(type){
+query += " AND p.type=?";
+params.push(type);
+}
 
-    if (maxPrice) {
-      query += " AND p.price <= ?";
-      params.push(maxPrice);
-    }
+if(listing_type){
+query += " AND p.listing_type=?";
+params.push(listing_type);
+}
 
-    const [properties] = await db.query(query, params);
+if(minPrice){
+query += " AND p.price>=?";
+params.push(minPrice);
+}
 
-    res.json(properties);
+if(maxPrice){
+query += " AND p.price<=?";
+params.push(maxPrice);
+}
 
-  } catch (err) {
-    next(err);
-  }
+query += " ORDER BY p.listed_at DESC";
+
+query += " LIMIT ? OFFSET ?";
+
+params.push(parseInt(limit));
+params.push((page-1)*limit);
+
+const [properties] = await db.query(query,params);
+
+res.json(properties);
+
+}
+catch(err){
+next(err);
+}
+
 };
 
 
 /* =============================
-GET PROPERTY BY ID
+GET PROPERTY DETAILS
 ============================= */
 
-exports.getPropertyById = async (req, res, next) => {
-  try {
+exports.getPropertyById = async (req,res,next)=>{
 
-    const [rows] = await db.query(
-    `
-    SELECT 
-    p.*, 
-    u.user_name AS owner_name,
-    pi.image_url AS image
-    FROM properties p
-    JOIN users u ON p.owner_id = u.user_id
-    LEFT JOIN property_images pi
-    ON p.property_id = pi.property_id
-    WHERE p.property_id = ?
-    `,
-    [req.params.id]
-    );
+try{
 
-    if (rows.length === 0) {
-      return res.status(404).json({
-        message: "Property not found"
-      });
-    }
+const id = req.params.id;
 
-    res.json(rows[0]);
+const [rows] = await db.query(
+`
+SELECT
+p.*,
+u.user_name AS owner_name
+FROM properties p
+JOIN users u ON p.owner_id = u.user_id
+WHERE p.property_id=?
+`,
+[id]
+);
 
-  } catch (err) {
-    next(err);
-  }
+if(rows.length === 0){
+return res.status(404).json({
+message:"Property not found"
+});
+}
+
+await db.query(
+"UPDATE properties SET views = views + 1 WHERE property_id=?",
+[id]
+);
+
+const [images] = await db.query(
+"SELECT image_url FROM property_images WHERE property_id=?",
+[id]
+);
+
+const property = rows[0];
+property.images = images;
+
+res.json(property);
+
+}
+catch(err){
+next(err);
+}
+
 };
 
 
@@ -118,25 +191,64 @@ exports.getPropertyById = async (req, res, next) => {
 UPDATE PROPERTY
 ============================= */
 
-exports.updateProperty = async (req, res, next) => {
-  try {
+exports.updateProperty = async (req,res,next)=>{
 
-    const { title, description, price, city, state, address, type } = req.body;
+try{
 
-    await db.query(
-      `UPDATE properties
-       SET title=?, description=?, price=?, city=?, state=?, address=?, type=?
-       WHERE property_id=?`,
-      [title, description, price, city, state, address, type, req.params.id]
-    );
+const propertyId = req.params.id;
 
-    res.json({
-      message: "Property updated successfully"
-    });
+const [rows] = await db.query(
+"SELECT owner_id FROM properties WHERE property_id=?",
+[propertyId]
+);
 
-  } catch (err) {
-    next(err);
-  }
+if(rows.length === 0){
+return res.status(404).json({
+message:"Property not found"
+});
+}
+
+if(rows[0].owner_id !== req.user.id){
+return res.status(403).json({
+message:"Not allowed"
+});
+}
+
+const {
+title,
+description,
+price,
+city,
+state,
+address,
+type
+} = req.body;
+
+await db.query(
+`UPDATE properties
+SET title=?,description=?,price=?,city=?,state=?,address=?,type=?
+WHERE property_id=?`,
+[
+title,
+description,
+price,
+city,
+state,
+address,
+type,
+propertyId
+]
+);
+
+res.json({
+message:"Property updated"
+});
+
+}
+catch(err){
+next(err);
+}
+
 };
 
 
@@ -144,19 +256,24 @@ exports.updateProperty = async (req, res, next) => {
 DELETE PROPERTY
 ============================= */
 
-exports.deleteProperty = async (req, res, next) => {
-  try {
+exports.deleteProperty = async (req,res,next)=>{
 
-    await db.query(
-      "DELETE FROM properties WHERE property_id=?",
-      [req.params.id]
-    );
+try{
 
-    res.json({
-      message: "Property deleted successfully"
-    });
+const propertyId = req.params.id;
 
-  } catch (err) {
-    next(err);
-  }
+await db.query(
+"DELETE FROM properties WHERE property_id=?",
+[propertyId]
+);
+
+res.json({
+message:"Property deleted"
+});
+
+}
+catch(err){
+next(err);
+}
+
 };
