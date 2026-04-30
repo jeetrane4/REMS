@@ -1,87 +1,78 @@
-const query = require("../utils/dbQuery");
+const { query } = require("../utils/dbQuery");
 
 /* ==============================
-COMPARE PROPERTIES
+   COMPARE PROPERTIES
 ============================== */
 
-exports.compareProperties = async (req,res,next)=>{
+exports.compareProperties = async (req, res, next) => {
+  try {
+    const { property_ids } = req.body;
 
-try{
+    const properties = await query(
+      `
+      SELECT
+        property_id,
+        title,
+        description,
+        price,
+        city,
+        state,
+        type,
+        listing_type,
+        bedrooms,
+        bathrooms,
+        area,
+        address,
+        latitude,
+        longitude,
+        status,
+        verification_status,
+        views
+      FROM properties
+      WHERE property_id = ANY($1::int[])
+      ORDER BY property_id ASC
+      `,
+      [property_ids]
+    );
 
-const { property_ids } = req.body;
+    if (properties.length < 2) {
+      return res.status(404).json({
+        success: false,
+        message: "At least 2 valid properties are required for comparison"
+      });
+    }
 
-if(!property_ids || !Array.isArray(property_ids) || property_ids.length < 2){
-return res.status(400).json({
-message:"Provide at least 2 property IDs for comparison"
-});
-}
+    const images = await query(
+      `
+      SELECT property_id, image_url
+      FROM property_images
+      WHERE property_id = ANY($1::int[])
+      ORDER BY image_id ASC
+      `,
+      [property_ids]
+    );
 
-/*
-Fetch selected properties
-*/
+    const imageMap = {};
 
-const properties = await query(
-`
-SELECT
-property_id,
-title,
-price,
-city,
-state,
-type,
-listing_type,
-bedrooms,
-bathrooms,
-area,
-address,
-latitude,
-longitude,
-status
-FROM properties
-WHERE property_id = ANY($1)
-`,
-[property_ids]
-);
+    images.forEach((img) => {
+      if (!imageMap[img.property_id]) {
+        imageMap[img.property_id] = [];
+      }
 
-/*
-Fetch images
-*/
+      imageMap[img.property_id].push(img.image_url);
+    });
 
-const images = await query(
-`
-SELECT property_id,image_url
-FROM property_images
-WHERE property_id = ANY($1)
-`,
-[property_ids]
-);
+    const result = properties.map((property) => ({
+      ...property,
+      images: imageMap[property.property_id] || []
+    }));
 
-/*
-Attach images to properties
-*/
-
-const imageMap = {};
-
-images.forEach(img=>{
-if(!imageMap[img.property_id]){
-imageMap[img.property_id] = [];
-}
-imageMap[img.property_id].push(img.image_url);
-});
-
-const result = properties.map(p=>({
-...p,
-images: imageMap[p.property_id] || []
-}));
-
-res.json({
-count: result.length,
-properties: result
-});
-
-}
-catch(err){
-next(err);
-}
-
+    return res.status(200).json({
+      success: true,
+      count: result.length,
+      data: result
+    });
+  } catch (err) {
+    next(err);
+  }
 };

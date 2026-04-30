@@ -1,64 +1,74 @@
-const query = require("../utils/dbQuery");
+const { query } = require("../utils/dbQuery");
 
 /* ==============================
-MAP SEARCH
+   MAP SEARCH
 ============================== */
 
-exports.searchNearbyProperties = async (req,res,next)=>{
+exports.searchNearbyProperties = async (req, res, next) => {
+  try {
+    const {
+      lat,
+      lng,
+      radius = 5,
+      type
+    } = req.query;
 
-try{
+    let sql = `
+      SELECT *
+      FROM (
+        SELECT
+          p.property_id,
+          p.title,
+          p.price,
+          p.city,
+          p.state,
+          p.address,
+          p.type,
+          p.listing_type,
+          p.latitude,
+          p.longitude,
+          (
+            6371 * acos(
+              cos(radians($1::numeric)) *
+              cos(radians(p.latitude::numeric)) *
+              cos(radians(p.longitude::numeric) - radians($2::numeric)) +
+              sin(radians($1::numeric)) *
+              sin(radians(p.latitude::numeric))
+            )
+          ) AS distance,
+          (
+            SELECT image_url
+            FROM property_images
+            WHERE property_id = p.property_id
+            ORDER BY image_id ASC
+            LIMIT 1
+          ) AS image
+        FROM properties p
+        WHERE p.verification_status = 'approved'
+          AND p.latitude IS NOT NULL
+          AND p.longitude IS NOT NULL
+      ) nearby
+      WHERE distance <= $3::numeric
+    `;
 
-const { lat, lng, radius = 5 } = req.query;
+    const params = [lat, lng, radius];
+    let index = 4;
 
-if(!lat || !lng){
-return res.status(400).json({
-message:"Latitude and longitude required"
-});
-}
+    if (type) {
+      sql += ` AND type = $${index++}`;
+      params.push(type);
+    }
 
-/*
-Distance formula using Haversine
-*/
+    sql += " ORDER BY distance ASC";
 
-const properties = await query(
-`
-SELECT
-p.property_id,
-p.title,
-p.price,
-p.city,
-p.latitude,
-p.longitude,
+    const properties = await query(sql, params);
 
-(
-6371 * acos(
-cos(radians($1)) *
-cos(radians(p.latitude)) *
-cos(radians(p.longitude) - radians($2)) +
-sin(radians($1)) *
-sin(radians(p.latitude))
-)
-) AS distance
-
-FROM properties p
-
-WHERE p.verification_status='approved'
-
-HAVING distance < $3
-
-ORDER BY distance
-`,
-[lat,lng,radius]
-);
-
-res.json({
-count:properties.length,
-properties
-});
-
-}
-catch(err){
-next(err);
-}
-
+    return res.status(200).json({
+      success: true,
+      count: properties.length,
+      data: properties
+    });
+  } catch (err) {
+    next(err);
+  }
 };

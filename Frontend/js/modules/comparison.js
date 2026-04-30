@@ -2,148 +2,219 @@
 // PROPERTY COMPARISON MODULE
 // =============================
 
+const COMPARE_KEY = "rems_compare";
+const MAX_COMPARE = 5;
+
 let selectedProperties = [];
 
 document.addEventListener("DOMContentLoaded", initComparison);
 
-function initComparison(){
+function initComparison() {
+  selectedProperties = loadCompareList();
 
-const btn = document.getElementById("compareBtn");
+  updateCompareUI();
 
-if(btn){
+  const btn = document.getElementById("compareBtn");
 
-btn.addEventListener("click", compareSelected);
+  if (btn) {
+    btn.addEventListener("click", compareSelected);
+  }
 
-}
+  const table = document.getElementById("comparisonTable");
 
-}
-
-/* =============================
-ADD PROPERTY TO COMPARE
-============================= */
-
-function toggleCompare(propertyId){
-
-if(selectedProperties.includes(propertyId)){
-
-selectedProperties =
-selectedProperties.filter(id=>id!==propertyId);
-
-}
-else{
-
-if(selectedProperties.length >= 3){
-
-notify("You can compare max 3 properties","info");
-return;
-
-}
-
-selectedProperties.push(propertyId);
-
-}
-
-updateCompareUI();
-
+  if (table && selectedProperties.length >= 2) {
+    compareSelected();
+  }
 }
 
 /* =============================
-UPDATE COMPARE UI
+   STORAGE
 ============================= */
 
-function updateCompareUI(){
-
-const counter = document.getElementById("compareCount");
-
-if(counter){
-
-counter.textContent = selectedProperties.length;
-
+function loadCompareList() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPARE_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
+function saveCompareList() {
+  localStorage.setItem(COMPARE_KEY, JSON.stringify(selectedProperties));
 }
 
 /* =============================
-COMPARE SELECTED
+   ADD / REMOVE PROPERTY
 ============================= */
 
-async function compareSelected(){
+function toggleCompare(propertyId) {
+  const id = Number(propertyId);
 
-if(selectedProperties.length < 2){
+  if (!id) {
+    window.notify?.("Invalid property selected", "error");
+    return;
+  }
 
-notify("Select at least 2 properties","error");
-return;
+  if (selectedProperties.includes(id)) {
+    selectedProperties = selectedProperties.filter((item) => item !== id);
+    window.notify?.("Removed from comparison", "info");
+  } else {
+    if (selectedProperties.length >= MAX_COMPARE) {
+      window.notify?.(`You can compare max ${MAX_COMPARE} properties`, "warning");
+      return;
+    }
 
-}
+    selectedProperties.push(id);
+    window.notify?.("Added to comparison", "success");
+  }
 
-try{
-
-showLoader();
-
-const res = await apiRequest(
-"/properties/compare",
-"POST",
-{ property_ids:selectedProperties }
-);
-
-renderComparison(res.properties);
-
-}
-catch(err){
-
-console.error(err);
-notify("Comparison failed","error");
-
-}
-finally{
-
-hideLoader();
-
-}
-
+  saveCompareList();
+  updateCompareUI();
 }
 
 /* =============================
-RENDER COMPARISON TABLE
+   UPDATE COMPARE UI
 ============================= */
 
-function renderComparison(properties){
+function updateCompareUI() {
+  const counter = document.getElementById("compareCount");
 
-const table = document.getElementById("comparisonTable");
+  if (counter) {
+    counter.textContent = selectedProperties.length;
+  }
 
-if(!table) return;
+  const btn = document.getElementById("compareBtn");
 
-table.innerHTML = `
+  if (btn) {
+    btn.disabled = selectedProperties.length < 2;
+  }
+}
 
-<tr>
-<th>Title</th>
-${properties.map(p=>`<td>${p.title}</td>`).join("")}
-</tr>
+/* =============================
+   COMPARE SELECTED
+============================= */
 
-<tr>
-<th>Price</th>
-${properties.map(p=>`<td>₹${p.price}</td>`).join("")}
-</tr>
+async function compareSelected() {
+  if (selectedProperties.length < 2) {
+    window.notify?.("Select at least 2 properties", "error");
+    return;
+  }
 
-<tr>
-<th>Bedrooms</th>
-${properties.map(p=>`<td>${p.bedrooms||"-"}</td>`).join("")}
-</tr>
+  try {
+    window.showLoader?.();
 
-<tr>
-<th>Area</th>
-${properties.map(p=>`<td>${p.area||"-"} sqft</td>`).join("")}
-</tr>
+    const res = await window.API.post("/comparisons", {
+      property_ids: selectedProperties
+    });
 
-<tr>
-<th>City</th>
-${properties.map(p=>`<td>${p.city}</td>`).join("")}
-</tr>
+    const properties = Array.isArray(res?.data) ? res.data : [];
 
-`;
+    if (!properties.length) {
+      throw new Error("No comparison data found");
+    }
 
+    renderComparison(properties);
+  } catch (err) {
+    console.error(err);
+    window.notify?.(err.message || "Comparison failed", "error");
+  } finally {
+    window.hideLoader?.();
+  }
+}
+
+/* =============================
+   RENDER COMPARISON TABLE
+============================= */
+
+function renderComparison(properties) {
+  const table = document.getElementById("comparisonTable");
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <th>Title</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.title || "-")}</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>Price</th>
+      ${properties
+        .map((p) => `<td>${window.Utils?.formatCurrency?.(p.price) || `₹${Number(p.price || 0).toLocaleString("en-IN")}`}</td>`)
+        .join("")}
+    </tr>
+
+    <tr>
+      <th>Type</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.type || "-")}</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>Listing Type</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.listing_type || "-")}</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>Bedrooms</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.bedrooms ?? "-")}</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>Bathrooms</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.bathrooms ?? "-")}</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>Area</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.area ?? "-")} sqft</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>City</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.city || "-")}</td>`).join("")}
+    </tr>
+
+    <tr>
+      <th>Status</th>
+      ${properties.map((p) => `<td>${escapeHTML(p.status || "-")}</td>`).join("")}
+    </tr>
+  `;
+}
+
+/* =============================
+   CLEAR COMPARISON
+============================= */
+
+function clearComparison() {
+  selectedProperties = [];
+  saveCompareList();
+  updateCompareUI();
+
+  const table = document.getElementById("comparisonTable");
+  if (table) table.innerHTML = "";
+
+  window.notify?.("Comparison cleared", "info");
+}
+
+/* =============================
+   XSS PROTECTION
+============================= */
+
+function escapeHTML(value) {
+  const str = String(value ?? "");
+
+  return str.replace(/[&<>"']/g, (m) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
 }
 
 /* expose globally */
 
 window.toggleCompare = toggleCompare;
+window.compareSelected = compareSelected;
+window.clearComparison = clearComparison;

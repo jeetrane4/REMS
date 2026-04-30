@@ -1,7 +1,7 @@
-const query = require("../utils/dbQuery");
+const { query } = require("../utils/dbQuery");
 
 /* ==============================
-GENERATE OTP
+   GENERATE OTP
 ============================== */
 
 exports.generateOTP = () => {
@@ -9,51 +9,60 @@ exports.generateOTP = () => {
 };
 
 /* ==============================
-SAVE OTP
+   SAVE OTP
 ============================== */
 
-exports.saveOTP = async (user_id, mobile, otp) => {
+exports.saveOTP = async (userId, mobile, otp) => {
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-  const expires_at = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
-  await query(
-    `INSERT INTO otp_verifications(user_id,mobile,otp_code,expires_at)
-     VALUES($1,$2,$3,$4)`,
-    [user_id, mobile, otp, expires_at]
+  const rows = await query(
+    `INSERT INTO otp_verifications (user_id, mobile, otp_code, expires_at)
+     VALUES ($1, $2, $3, $4)
+     RETURNING otp_id, user_id, mobile, expires_at`,
+    [userId, mobile, otp, expiresAt]
   );
+
+  return rows[0];
 };
 
 /* ==============================
-VERIFY OTP
+   VERIFY OTP
 ============================== */
 
 exports.verifyOTP = async (mobile, otp) => {
-
   const records = await query(
     `SELECT *
      FROM otp_verifications
-     WHERE mobile=$1
-     AND otp_code=$2
-     AND is_verified=false
+     WHERE mobile = $1
+       AND otp_code = $2
+       AND is_verified = false
+       AND expires_at > NOW()
      ORDER BY created_at DESC
      LIMIT 1`,
     [mobile, otp]
   );
 
-  if (records.length === 0) return false;
+  if (records.length === 0) {
+    return null;
+  }
 
   const record = records[0];
 
-  if (new Date() > new Date(record.expires_at)) {
-    return false;
-  }
-
   await query(
     `UPDATE otp_verifications
-     SET is_verified=true
-     WHERE otp_id=$1`,
+     SET is_verified = true
+     WHERE otp_id = $1`,
     [record.otp_id]
   );
+
+  if (record.user_id) {
+    await query(
+      `UPDATE users
+       SET is_mobile_verified = true
+       WHERE user_id = $1`,
+      [record.user_id]
+    );
+  }
 
   return record;
 };

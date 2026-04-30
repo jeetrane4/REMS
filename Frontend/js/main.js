@@ -5,142 +5,126 @@
 document.addEventListener("DOMContentLoaded", initApp);
 
 async function initApp() {
-
   try {
-
-    showLoader?.();
+    window.showLoader?.();
 
     await loadPartials();
 
-    if (typeof initNavbar === "function") {
-      initNavbar();
-    }
+    window.initNavbar?.();
+    window.initTheme?.();
 
+    protectPageRoutes();
+    protectElements();
     applyRoleVisibility();
-
-    protectRoutes();
-
     initBackToTop();
-
   } catch (error) {
-
     console.error("App initialization failed:", error);
-
+    window.notify?.("App initialization failed", "error");
   } finally {
-
-    hideLoader?.();
-
+    window.hideLoader?.(true);
   }
 }
-
-
-/* =============================
-LOAD HEADER + FOOTER
-============================= */
 
 async function loadPartials() {
+  const partials = [
+    { id: "header", url: "partials/header.html" },
+    { id: "footer", url: "partials/footer.html" }
+  ];
 
-  const headerEl = document.getElementById("header");
-  const footerEl = document.getElementById("footer");
+  await Promise.all(
+    partials.map(async ({ id, url }) => {
+      const element = document.getElementById(id);
+      if (!element) return;
 
-  const requests = [];
-
-  if (headerEl) {
-    requests.push(fetch("partials/header.html"));
-  }
-
-  if (footerEl) {
-    requests.push(fetch("partials/footer.html"));
-  }
-
-  const responses = await Promise.all(requests);
-
-  let index = 0;
-
-  if (headerEl && responses[index]?.ok) {
-    headerEl.innerHTML = await responses[index].text();
-    index++;
-  }
-
-  if (footerEl && responses[index]?.ok) {
-    footerEl.innerHTML = await responses[index].text();
-  }
-
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${url} failed`);
+        element.innerHTML = await response.text();
+      } catch (error) {
+        console.error(`Failed to load ${url}:`, error.message);
+      }
+    })
+  );
 }
 
+function protectPageRoutes() {
+  const protectedPages = [
+    "dashboard.html",
+    "dashboard-properties.html",
+    "add-property.html",
+    "bookings.html",
+    "saved-properties.html",
+    "settings.html",
+    "transactions.html",
+    "users.html"
+  ];
 
-/* =============================
-ROLE BASED UI CONTROL
-============================= */
+  const currentPage = window.location.pathname.split("/").pop() || "index.html";
 
-function applyRoleVisibility(){
+  if (protectedPages.includes(currentPage) && !window.Storage?.isLoggedIn?.()) {
+    window.location.href = "login.html";
+  }
+}
 
-  const user = Storage?.getUser?.();
+function applyRoleVisibility() {
+  const user = window.Storage?.getUser?.();
+  const role = String(user?.role || "guest").toLowerCase();
 
-  if(!user) return;
+  document.body.dataset.role = role;
 
-  if(user.role === "buyer"){
+  document.querySelectorAll("[data-role]").forEach((el) => {
+    const allowedRoles = el.dataset.role
+      .split(",")
+      .map((r) => r.trim().toLowerCase());
 
+    if (!allowedRoles.includes(role)) {
+      el.remove();
+    }
+  });
+
+  if (role === "buyer") {
     document
-      .querySelectorAll('[href="add-property.html"]')
-      .forEach(btn => btn.remove());
-
-    const postBtn = document.getElementById("postPropertyBtn");
-    if(postBtn) postBtn.remove();
-
+      .querySelectorAll('[href="add-property.html"], #postPropertyBtn')
+      .forEach((el) => el.remove());
   }
 
+  if (role !== "admin") {
+    document
+      .querySelectorAll('[href="users.html"], [data-admin]')
+      .forEach((el) => el.remove());
+  }
 }
 
+function protectElements() {
+  const token = window.Storage?.getToken?.();
 
-/* =============================
-ROUTE PROTECTION
-============================= */
-
-function protectRoutes(){
-
-  const token = Storage?.getToken?.();
-
-  const protectedElements = document.querySelectorAll("[data-protected]");
-
-  protectedElements.forEach(el => {
-
-    if(!token){
-      el.style.display = "none";
-    }
-
+  document.querySelectorAll("[data-protected]").forEach((el) => {
+    if (!token) el.style.display = "none";
   });
-
 }
 
-
-/* =============================
-BACK TO TOP BUTTON
-============================= */
-
-function initBackToTop(){
-
+function initBackToTop() {
   const topBtn = document.getElementById("topBtn");
+  if (!topBtn) return;
 
-  if(!topBtn) return;
+  const toggleButton = () => {
+    topBtn.classList.toggle("hidden", window.scrollY <= 300);
+  };
 
-  window.addEventListener("scroll", () => {
-
-    if(window.scrollY > 300){
-      topBtn.classList.remove("hidden");
-    }else{
-      topBtn.classList.add("hidden");
-    }
-
-  });
+  window.addEventListener(
+    "scroll",
+    window.Utils?.throttle?.(toggleButton, 200) || toggleButton
+  );
 
   topBtn.addEventListener("click", () => {
-
     window.scrollTo({
-      top:0,
-      behavior:"smooth"
+      top: 0,
+      behavior: "smooth"
     });
-
   });
-
 }
+
+window.loadPartials = loadPartials;
+window.applyRoleVisibility = applyRoleVisibility;
+window.protectPageRoutes = protectPageRoutes;
+window.protectElements = protectElements;

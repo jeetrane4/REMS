@@ -1,9 +1,37 @@
 const express = require("express");
+const { param } = require("express-validator");
+
 const router = express.Router();
-const auth = require("../middleware/authMiddleware");
+
+const protect = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
+
 const notificationController = require("../controllers/notificationController");
 
-router.get("/", auth, notificationController.getNotifications);
-router.put("/:notification_id", auth, notificationController.markAsRead);
+/* =========================
+   GET USER NOTIFICATIONS
+========================= */
+
+router.get(
+  "/",
+  protect,
+  notificationController.getNotifications
+);
+
+/* =========================
+   MARK NOTIFICATION AS READ
+========================= */
+
+router.patch(
+  "/:notification_id/read",
+  protect,
+  [
+    param("notification_id")
+      .isInt()
+      .withMessage("Invalid notification ID")
+  ],
+  validate,
+  notificationController.markAsRead
+);
 
 module.exports = router;

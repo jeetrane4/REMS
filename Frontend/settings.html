@@ -2,288 +2,363 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Settings – REMS</title>
 
-<title>Account Settings – REMS</title>
+  <meta
+    name="description"
+    content="Manage your REMS profile, preferences, and account settings."
+  >
 
-<meta name="description"
-content="Manage your REMS account settings">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/forms.css">
-<link rel="stylesheet" href="css/pages.css">
-<link rel="stylesheet" href="css/responsive.css">
-<link rel="stylesheet" href="css/animations.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
 
-<header id="header"></header>
-
-<main class="section dashboard-page">
-
-<div class="container">
-
-<!-- HEADER -->
-
-<div class="dashboard-header">
-
-<div>
-
-<h1>Account Settings</h1>
-
-<p class="muted-text">
-
-Manage your profile and preferences
-
-</p>
-
-</div>
-
-</div>
-
-
-<!-- PROFILE -->
-
-<section class="section section-light">
-
-<div class="card profile-card">
-
-<h3>Profile Information</h3>
-
-<form id="profileForm" class="form-grid">
-
-<div class="form-group">
-
-<label>Full Name</label>
-
-<input
-type="text"
-id="fullName"
-placeholder="full name"
-required>
-
-</div>
-
-<div class="form-group">
-
-<label>Email</label>
-
-<input
-type="email"
-id="email"
-placeholder="email"
-required>
-
-</div>
-
-<div class="form-actions">
-
-<button
-type="submit"
-class="btn btn--primary">
-
-Update Profile
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</section>
-
-
-<!-- PASSWORD -->
-
-<section class="section">
-
-<div class="card">
-
-<h3>Change Password</h3>
-
-<form id="passwordForm" class="form-grid">
-
-<div class="form-group">
-
-<label>Current Password</label>
-
-<input
-type="password"
-id="currentPassword"
-placeholder="current password"
-required>
-
-</div>
-
-<div class="form-group">
-
-<label>New Password</label>
-
-<input
-type="password"
-id="newPassword"
-placeholder="new password"
-required>
-
-</div>
-
-<div class="form-group">
-
-<label>Confirm Password</label>
-
-<input
-type="password"
-id="confirmPassword"
-placeholder="confirm password"
-required>
-
-</div>
-
-<div class="form-actions">
-
-<button
-type="submit"
-class="btn btn--primary">
-
-Update Password
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</section>
-
-
-<!-- PREFERENCES -->
-
-<section class="section">
-
-<div class="card">
-
-<h3>Preferences</h3>
-
-<div class="preference-row">
-
-<span>Theme</span>
-
-<button
-id="themeToggle"
-class="btn btn--outline">
-
-Toggle Theme
-
-</button>
-
-</div>
-
-<div class="preference-row">
-
-<span>Account Role</span>
-
-<span
-id="accountRole"
-class="badge">
-
-Loading...
-
-</span>
-
-</div>
-
-<div class="preference-row">
-
-<span>Account Status</span>
-
-<span
-id="accountStatus"
-class="badge badge--success">
-
-Active
-
-</span>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- DELETE ACCOUNT -->
-
-<section class="section">
-
-<div class="card danger-card">
-
-<h3>Danger Zone</h3>
-
-<p class="muted-text">
-
-Deleting your account is permanent.
-
-</p>
-
-<button
-id="deleteAccountBtn"
-class="btn btn--danger">
-
-Delete Account
-
-</button>
-
-</div>
-
-</section>
-
-</div>
-
-</main>
-
-<footer id="footer"></footer>
-
-<button
-id="topBtn"
-class="btn btn-circle hidden">
-
-↑
-
-</button>
-
-
-<!-- CORE -->
-
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
-
-<!-- UI -->
-
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/notifications.js"></script>
-
-<!-- MODULE -->
-
-<script src="js/modules/users.js"></script>
-
-<!-- MAIN -->
-
-<script src="js/main.js"></script>
+  <header id="header"></header>
+
+  <main class="section dashboard-page">
+    <div class="container">
+
+      <!-- HEADER -->
+      <div class="dashboard-header">
+        <div>
+          <h1>Account Settings</h1>
+
+          <p class="muted-text">
+            Manage your profile and preferences
+          </p>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <section class="section section-light">
+        <div class="card profile-card">
+          <h3>Profile Information</h3>
+
+          <form id="profileForm" class="form-grid">
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+
+              <input
+                type="text"
+                id="fullName"
+                name="name"
+                placeholder="Full name"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Email"
+                disabled
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="mobile">Mobile</label>
+
+              <input
+                type="tel"
+                id="mobile"
+                name="mobile"
+                placeholder="Mobile number"
+              >
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn btn--primary"
+                id="profileSubmitBtn">
+                Update Profile
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- PASSWORD -->
+      <section class="section">
+        <div class="card">
+          <h3>Change Password</h3>
+
+          <p class="muted-text small">
+            Password change API is not added yet. This section is kept for future enhancement.
+          </p>
+
+          <form id="passwordForm" class="form-grid">
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+
+              <input
+                type="password"
+                id="currentPassword"
+                placeholder="Current password"
+                disabled
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+
+              <input
+                type="password"
+                id="newPassword"
+                placeholder="New password"
+                disabled
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password</label>
+
+              <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm password"
+                disabled
+              >
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn btn--primary"
+                disabled>
+                Update Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- PREFERENCES -->
+      <section class="section">
+        <div class="card">
+          <h3>Preferences</h3>
+
+          <div class="preference-row">
+            <span>Theme</span>
+
+            <button
+              id="settingsThemeToggle"
+              type="button"
+              class="btn btn--outline">
+              Toggle Theme
+            </button>
+          </div>
+
+          <div class="preference-row">
+            <span>Account Role</span>
+
+            <span
+              id="accountRole"
+              class="badge">
+              Loading...
+            </span>
+          </div>
+
+          <div class="preference-row">
+            <span>Account Status</span>
+
+            <span
+              id="accountStatus"
+              class="badge badge--success">
+              Active
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- DELETE ACCOUNT -->
+      <section class="section">
+        <div class="card danger-card">
+          <h3>Danger Zone</h3>
+
+          <p class="muted-text">
+            Account deletion for users is not enabled from this page. Contact admin for account removal.
+          </p>
+
+          <button
+            id="deleteAccountBtn"
+            type="button"
+            class="btn btn--danger"
+            disabled>
+            Delete Account
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+
+  <button
+    id="topBtn"
+    class="btn btn-circle hidden"
+    aria-label="Back to top">
+    ↑
+  </button>
+
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
+
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
+
+  <!-- Settings Page Logic -->
+  <script defer>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = window.Storage?.getUser?.();
+
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      await loadProfile();
+      bindProfileForm();
+      bindSettingsThemeToggle();
+    });
+
+    async function loadProfile() {
+      try {
+        window.showLoader?.();
+
+        const res = await window.API.get("/users/profile/me");
+        const profile = res?.data || {};
+
+        document.getElementById("fullName").value =
+          profile.user_name || profile.name || "";
+
+        document.getElementById("email").value =
+          profile.user_email || profile.email || "";
+
+        document.getElementById("mobile").value =
+          profile.user_mobile || profile.mobile || "";
+
+        document.getElementById("accountRole").textContent =
+          profile.role || "-";
+
+        document.getElementById("accountStatus").textContent =
+          profile.is_active ? "Active" : "Inactive";
+
+        const storedUser = window.Storage?.getUser?.() || {};
+
+        window.Storage?.setUser?.({
+          ...storedUser,
+          id: profile.user_id,
+          name: profile.user_name,
+          email: profile.user_email,
+          mobile: profile.user_mobile,
+          role: profile.role
+        });
+      } catch (err) {
+        console.error(err);
+        window.notify?.(err.message || "Failed to load profile", "error");
+      } finally {
+        window.hideLoader?.();
+      }
+    }
+
+    function bindProfileForm() {
+      const form = document.getElementById("profileForm");
+
+      if (!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById("profileSubmitBtn");
+        if (btn) btn.disabled = true;
+
+        const payload = {
+          name: document.getElementById("fullName")?.value?.trim(),
+          mobile: document.getElementById("mobile")?.value?.trim()
+        };
+
+        try {
+          window.showLoader?.();
+
+          const res = await window.API.patch("/users/profile/me", payload);
+          const profile = res?.data || {};
+
+          const storedUser = window.Storage?.getUser?.() || {};
+
+          window.Storage?.setUser?.({
+            ...storedUser,
+            id: profile.user_id,
+            name: profile.user_name,
+            email: profile.user_email,
+            mobile: profile.user_mobile,
+            role: profile.role
+          });
+
+          window.notify?.("Profile updated successfully", "success");
+        } catch (err) {
+          console.error(err);
+          window.notify?.(err.message || "Failed to update profile", "error");
+        } finally {
+          window.hideLoader?.();
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+
+    function bindSettingsThemeToggle() {
+      document.getElementById("settingsThemeToggle")?.addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme") || "light";
+        const next = current === "dark" ? "light" : "dark";
+
+        window.applyTheme?.(next);
+        localStorage.setItem("rems_theme", next);
+        localStorage.setItem("theme", next);
+      });
+    }
+  </script>
+
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
 
 </body>
 </html>

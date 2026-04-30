@@ -1,53 +1,55 @@
 // =============================
-// GLOBAL LOADER SYSTEM – PRODUCTION READY
+// GLOBAL LOADER SYSTEM
 // =============================
 
 let loaderElement = null;
-
-// =============================
-// CREATE LOADER
-// =============================
+let loaderCount = 0;
 
 function createLoader() {
-  if (loaderElement) return;
+  if (loaderElement) return loaderElement;
 
   loaderElement = document.createElement("div");
   loaderElement.className = "app-loader";
   loaderElement.innerHTML = `
-    <div class="loader-spinner"></div>
+    <div class="loader-spinner" aria-label="Loading"></div>
   `;
 
   document.body.appendChild(loaderElement);
+  return loaderElement;
 }
-
-// =============================
-// SHOW LOADER
-// =============================
 
 function showLoader() {
   createLoader();
+
+  loaderCount += 1;
+
   loaderElement.classList.add("active");
   document.body.style.overflow = "hidden";
 }
 
-// =============================
-// HIDE LOADER
-// =============================
-
-function hideLoader() {
+function hideLoader(force = false) {
   if (!loaderElement) return;
+
+  if (force) {
+    loaderCount = 0;
+  } else {
+    loaderCount = Math.max(0, loaderCount - 1);
+  }
+
+  if (loaderCount > 0) return;
 
   loaderElement.classList.remove("active");
 
   setTimeout(() => {
-    document.body.style.overflow = "";
+    if (loaderCount === 0) {
+      document.body.style.overflow = "";
+    }
   }, 300);
 }
 
-// =============================
-// AUTO HIDE AFTER PAGE LOAD
-// =============================
-
 window.addEventListener("load", () => {
-  hideLoader();
+  hideLoader(true);
 });
+
+window.showLoader = showLoader;
+window.hideLoader = hideLoader;

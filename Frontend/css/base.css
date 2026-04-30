@@ -1,209 +1,282 @@
 /* =========================
-REMS BASE SYSTEM – PRODUCTION STABLE
+   REMS BASE SYSTEM
 ========================= */
-
 
 /* ================= RESET ================= */
 
 *,
 *::before,
 *::after {
-margin:0;
-padding:0;
-box-sizing:border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-
 
 /* ================= HTML ================= */
 
-html{
-line-height:1.6;
--webkit-font-smoothing:antialiased;
-text-rendering:optimizeLegibility;
-scroll-behavior:smooth;
-height:100%;
+html {
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  min-height: 100%;
 }
-
 
 /* ================= BODY ================= */
 
-body{
-font-family:var(--font-body);
-background-color:var(--color-bg);
-color:var(--color-text-primary);
-min-height:100vh;
-display:flex;
-flex-direction:column;
+body {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--color-bg-gradient);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
-
 
 /* ================= MEDIA ================= */
 
 img,
 video,
 canvas,
-svg{
-max-width:100%;
-height:auto;
-display:block;
+svg,
+picture {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-
-/* ================= LIST RESET ================= */
+/* ================= LIST / TABLE RESET ================= */
 
 ul,
-ol{
-list-style:none;
+ol {
+  list-style: none;
 }
 
-
-/* ================= TABLE RESET ================= */
-
-table{
-width:100%;
-border-collapse:collapse;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
 
 /* ================= TYPOGRAPHY ================= */
 
-h1,h2,h3,h4,h5,h6{
-font-family:var(--font-heading);
-color:var(--color-text-primary);
-font-weight:600;
-line-height:1.2;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
 }
 
-h1{
-font-size:clamp(32px,5vw,42px);
-margin-bottom:var(--space-lg);
+h1 {
+  font-size: clamp(34px, 5vw, 52px);
+  margin-bottom: var(--space-lg);
 }
 
-h2{
-font-size:clamp(26px,4vw,34px);
-margin-bottom:var(--space-md);
+h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  margin-bottom: var(--space-md);
 }
 
-h3{
-font-size:22px;
-margin-bottom:var(--space-sm);
+h3 {
+  font-size: clamp(20px, 2.5vw, 26px);
+  margin-bottom: var(--space-sm);
 }
 
-p{
-color:var(--color-text-secondary);
-margin-bottom:var(--space-md);
-line-height:1.7;
+h4 {
+  font-size: 18px;
+  margin-bottom: var(--space-sm);
 }
 
+p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+  line-height: 1.75;
+}
+
+strong {
+  color: var(--color-text-primary);
+}
+
+small {
+  color: var(--color-text-muted);
+}
 
 /* ================= LINKS ================= */
 
-a{
-text-decoration:none;
-color:inherit;
-transition:color var(--transition);
+a {
+  text-decoration: none;
+  color: inherit;
+  transition:
+    color var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
-a:hover{
-color:var(--color-primary);
+a:hover {
+  color: var(--color-primary);
 }
-
 
 /* ================= ACCESSIBILITY ================= */
 
-:focus-visible{
-outline:2px solid var(--color-primary);
-outline-offset:2px;
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 /* ================= LAYOUT ================= */
 
-.container{
-width:90%;
-max-width:1200px;
-margin:0 auto;
+.container {
+  width: min(92%, var(--container-max));
+  margin: 0 auto;
 }
 
-main{
-flex:1;
+main {
+  flex: 1;
 }
-
 
 /* ================= SECTIONS ================= */
 
-.section{
-padding:clamp(60px,8vw,100px) 0;
-position:relative;
+.section {
+  padding: clamp(56px, 8vw, 96px) 0;
+  position: relative;
 }
 
-.section--light{
-background:var(--color-surface-2);
+.section-light,
+.section--light {
+  background: var(--color-surface-2);
 }
 
-.section--gradient{
-background:linear-gradient(
-135deg,
-rgba(37,99,235,0.08),
-rgba(245,158,11,0.05)
-);
+.section--gradient {
+  background:
+    radial-gradient(circle at top left, var(--color-primary-soft), transparent 34%),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(245, 158, 11, 0.06));
 }
 
+.section__header,
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.section__header p,
+.section-header p {
+  margin-bottom: 0;
+}
 
 /* ================= FORM NORMALIZATION ================= */
 
 button,
 input,
 select,
-textarea{
-font-family:inherit;
-font-size:1rem;
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
 }
 
-button{
-border:none;
-background:none;
-cursor:pointer;
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
-
-/* ================= UTILITIES ================= */
-
-.hidden{
-display:none !important;
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
-.loading{
-overflow:hidden;
-pointer-events:none;
+/* ================= COMMON UTILITIES ================= */
+
+.hidden {
+  display: none !important;
 }
 
-.center{
-text-align:center;
+.loading {
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.text-center{
-text-align:center;
+.center,
+.text-center {
+  text-align: center;
 }
 
-.small{
-font-size:0.9rem;
+.small {
+  font-size: 0.9rem;
 }
 
-.muted-text{
-color:var(--color-text-secondary);
+.muted-text {
+  color: var(--color-text-muted);
 }
 
-.display-title{
-font-size:clamp(64px,12vw,120px);
-font-weight:700;
-line-height:1;
+.display-title {
+  font-size: clamp(72px, 14vw, 140px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
 }
 
-.flex{
-display:flex;
+.flex {
+  display: flex;
 }
 
-.grid{
-display:grid;
+.grid {
+  display: grid;
+}
+
+.error-text {
+  color: var(--color-error);
+}
+
+.success-text {
+  color: var(--color-success);
+}
+
+/* ================= TABLE BASIC ================= */
+
+th,
+td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+th {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  background: var(--color-surface-2);
+}
+
+td {
+  color: var(--color-text-secondary);
+}
+
+/* ================= HR ================= */
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-xl) 0;
 }

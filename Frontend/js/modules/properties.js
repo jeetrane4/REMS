@@ -1,11 +1,10 @@
 // =============================
-// PROPERTY MODULE – REMS (FULL VERSION)
+// PROPERTY MODULE – REMS
 // =============================
 
 document.addEventListener("DOMContentLoaded", initPropertyModule);
 
 function initPropertyModule() {
-
   initSearch();
   loadFeaturedProperties();
   initPropertyList();
@@ -22,533 +21,577 @@ function initPropertyModule() {
 }
 
 /* =================================================
-SEARCH (INDEX PAGE)
+   HELPERS
 ================================================= */
 
-function initSearch(){
+function getResponseData(response, fallback = []) {
+  if (!response) return fallback;
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.data)) return response.data;
+  if (response.data && typeof response.data === "object") return response.data;
+  return fallback;
+}
 
+function resolveImagePath(image) {
+  if (!image) return "images/img1.webp";
+
+  if (image.startsWith("http")) return image;
+
+  if (image.startsWith("/uploads")) {
+    const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+    return `${base}${image}`;
+  }
+
+  return image;
+}
+
+function escapeHTML(value) {
+  const str = String(value ?? "");
+
+  return str.replace(/[&<>"']/g, (m) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
+}
+
+/* =================================================
+   SEARCH
+================================================= */
+
+function initSearch() {
   const form = document.getElementById("searchForm");
-  if(!form) return;
+  if (!form) return;
 
-  form.addEventListener("submit",(e)=>{
-
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const city = document.getElementById("city")?.value || "";
+    const city = document.getElementById("city")?.value?.trim() || "";
     const type = document.getElementById("type")?.value || "";
     const budget = document.getElementById("budget")?.value || "";
 
     const params = new URLSearchParams();
 
-    if(city) params.append("city",city);
-    if(type) params.append("type",type);
+    if (city) params.append("city", city);
+    if (type) params.append("type", type);
 
-    if(budget){
-
-      if(budget.includes("-")){
-        const [min,max] = budget.split("-");
-        params.append("minPrice",min);
-        params.append("maxPrice",max);
+    if (budget) {
+      if (budget.includes("-")) {
+        const [min, max] = budget.split("-");
+        if (min) params.append("minPrice", min);
+        if (max) params.append("maxPrice", max);
+      } else if (budget.includes("+")) {
+        params.append("minPrice", budget.replace("+", ""));
       }
-
-      if(budget.includes("+")){
-        params.append("minPrice",budget.replace("+",""));
-      }
-
     }
 
     window.location.href = `listings.html?${params.toString()}`;
-
   });
-
 }
 
 /* =================================================
-FEATURED PROPERTIES (HOME)
+   FEATURED PROPERTIES
 ================================================= */
 
-async function loadFeaturedProperties(){
-
+async function loadFeaturedProperties() {
   const container = document.getElementById("featuredProperties");
-  if(!container) return;
+  if (!container) return;
 
-  try{
+  try {
+    window.showLoader?.();
 
-    showLoader?.();
+    const res = await window.API.get("/properties?limit=6");
+    const list = getResponseData(res, []).slice(0, 6);
 
-    const properties = await apiRequest("/properties");
-
-    const list = properties?.slice(0,6) || [];
-
-    container.innerHTML = list.map(renderPropertyCard).join("");
-
-  }catch(err){
-
+    container.innerHTML = list.length
+      ? list.map(renderPropertyCard).join("")
+      : `<p class="muted-text">No featured properties available.</p>`;
+  } catch (err) {
     console.error(err);
-    notify?.("Failed to load featured properties","error");
-
-  }finally{
-    hideLoader?.();
+    window.notify?.("Failed to load featured properties", "error");
+  } finally {
+    window.hideLoader?.();
   }
-
 }
 
 /* =================================================
-PROPERTY LIST (LISTINGS PAGE)
+   PROPERTY LIST
 ================================================= */
 
-async function initPropertyList(){
-
+async function initPropertyList() {
   const container = document.getElementById("propertyList");
-  if(!container) return;
+  if (!container) return;
 
-  try{
+  try {
+    window.showLoader?.();
 
-    showLoader?.();
-    container.innerHTML = `
-      <div class="loading-state">
-      Loading properties...
-      </div>
-    `;
+    container.innerHTML = `<div class="loading-state">Loading properties...</div>`;
 
     const params = new URLSearchParams(window.location.search);
     const query = params.toString();
 
-    const properties = await apiRequest(`/properties?${query}`);
+    const res = await window.API.get(`/properties${query ? `?${query}` : ""}`);
+    const properties = getResponseData(res, []);
 
-    if(!properties || properties.length === 0){
-
-      const empty = document.getElementById("emptyState");
-      if(empty) empty.classList.remove("hidden");
+    if (!properties.length) {
+      container.innerHTML = "";
+      document.getElementById("emptyState")?.classList.remove("hidden");
+      updateResults(0);
       return;
-
     }
 
+    document.getElementById("emptyState")?.classList.add("hidden");
     container.innerHTML = properties.map(renderPropertyCard).join("");
 
-    updateResults(properties.length);
-
-  }catch(err){
-
+    updateResults(res.total || properties.length);
+  } catch (err) {
     console.error(err);
-    notify?.("Failed to load properties","error");
-
-  }finally{
-    hideLoader?.();
+    container.innerHTML = `<p class="error-text">Failed to load properties.</p>`;
+    window.notify?.("Failed to load properties", "error");
+  } finally {
+    window.hideLoader?.();
   }
-
-}
-
-/* =============================
-ADD PROPERTY
-============================= */
-
-function initAddProperty(){
-
-const form = document.getElementById("addPropertyForm");
-
-if(!form) return;
-
-form.addEventListener("submit", async (e)=>{
-
-e.preventDefault();
-
-const data = new FormData(form);
-
-const amenities = Array.from(
-document.querySelectorAll('input[name="amenities"]:checked')
-).map(a => a.value);
-
-data.set("amenities", JSON.stringify(amenities));
-
-const payload = Object.fromEntries(data.entries());
-
-try{
-
-showLoader?.();
-
-await apiRequest("/properties","POST",payload);
-
-notify?.("Property added successfully","success");
-
-setTimeout(()=>{
-window.location.href = "listings.html";
-},1200);
-
-}
-catch(err){
-
-console.error(err);
-notify?.("Failed to add property","error");
-
-}
-finally{
-hideLoader?.();
-}
-
-});
-
 }
 
 /* =================================================
-PROPERTY CARD TEMPLATE
+   ADD PROPERTY
 ================================================= */
 
-function renderPropertyCard(p){
+function initAddProperty() {
+  const form = document.getElementById("addPropertyForm");
+  if (!form) return;
 
-const id = p.property_id || p.id;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-return `
+    const submitBtn = form.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.disabled = true;
 
-<div class="property-card">
+    const formData = new FormData(form);
 
-<div class="property-card__image">
+    const amenities = Array.from(
+      document.querySelectorAll('input[name="amenities"]:checked')
+    ).map((a) => a.value);
 
-<img
-src="${p.image || 'images/img1.webp'}"
-alt="${escapeHTML(p.title)}"
-loading="lazy"
-onerror="this.src='images/img1.webp'"
->
+    const payload = Object.fromEntries(formData.entries());
 
-<span class="property-badge">
-${escapeHTML(p.type || "Property")}
-</span>
+    payload.amenities = amenities;
+    payload.price = Number(payload.price || 0);
+    payload.bedrooms = Number(payload.bedrooms || 0);
+    payload.bathrooms = Number(payload.bathrooms || 0);
+    payload.area = payload.area ? Number(payload.area) : null;
+    payload.latitude = payload.latitude ? Number(payload.latitude) : null;
+    payload.longitude = payload.longitude ? Number(payload.longitude) : null;
 
-</div>
+    try {
+      window.showLoader?.();
 
-<div class="property-card__content">
+      const res = await window.API.post("/properties", payload);
+      const property = getResponseData(res, null);
 
-<h3>${escapeHTML(p.title)}</h3>
+      const imageInput = form.querySelector('input[type="file"][name="images"]');
 
-<p class="property-card__location">
-${escapeHTML(p.city)}
-</p>
+      if (imageInput?.files?.length && property?.property_id) {
+        const uploadData = new FormData();
 
-<p class="property-card__price">
-₹${Number(p.price).toLocaleString()}
-</p>
+        Array.from(imageInput.files).forEach((file) => {
+          uploadData.append("images", file);
+        });
 
-<a href="listing-details.html?id=${id}"
-class="btn btn--primary btn--small">
-View Details
-</a>
+        await window.API.upload(`/property-images/${property.property_id}`, uploadData);
+      }
 
-<button onclick="toggleCompare(${id})" class="btn btn--outline btn--small">
-Compare
-</button>
+      window.notify?.("Property added successfully", "success");
 
-</div>
-
-</div>
-
-`;
-
+      setTimeout(() => {
+        window.location.href = "dashboard-properties.html";
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Failed to add property", "error");
+    } finally {
+      window.hideLoader?.();
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
 }
 
 /* =================================================
-RESULT COUNT
+   PROPERTY CARD TEMPLATE
 ================================================= */
 
-function updateResults(count){
+function renderPropertyCard(p) {
+  const id = p.property_id || p.id;
+  const image = resolveImagePath(p.image);
 
+  return `
+    <div class="property-card">
+      <div class="property-card__image">
+        <img
+          src="${escapeHTML(image)}"
+          alt="${escapeHTML(p.title || "Property")}"
+          loading="lazy"
+          onerror="this.src='images/img1.webp'"
+        >
+
+        <span class="property-badge">
+          ${escapeHTML(p.type || "Property")}
+        </span>
+      </div>
+
+      <div class="property-card__content">
+        <h3>${escapeHTML(p.title || "Untitled Property")}</h3>
+
+        <p class="property-card__location">
+          ${escapeHTML(p.city || "Location not available")}
+        </p>
+
+        <p class="property-card__price">
+          ${window.Utils?.formatCurrency?.(p.price) || `₹${Number(p.price || 0).toLocaleString("en-IN")}`}
+        </p>
+
+        <div class="property-card__actions">
+          <a href="listing-details.html?id=${id}" class="btn btn--primary btn--small">
+            View Details
+          </a>
+
+          <button type="button" onclick="toggleCompare(${id})" class="btn btn--outline btn--small">
+            Compare
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* =================================================
+   RESULT COUNT
+================================================= */
+
+function updateResults(count) {
   const el = document.getElementById("resultsCount");
 
-  if(el){
+  if (el) {
     el.textContent = `${count} Properties Found`;
   }
-
 }
 
 /* =================================================
-PROPERTY DETAILS PAGE
+   PROPERTY DETAILS PAGE
 ================================================= */
 
-async function initPropertyDetails(){
-
+async function initPropertyDetails() {
   const container = document.getElementById("propertyDetails");
-  if(!container) return;
+  if (!container) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const propertyId = params.get("id");
+  const propertyId = new URLSearchParams(window.location.search).get("id");
 
-  if(!propertyId) return;
+  if (!propertyId) {
+    container.innerHTML = `<p class="error-text">Property ID missing.</p>`;
+    return;
+  }
 
-  try{
+  try {
+    window.showLoader?.();
 
-    showLoader?.();
+    const res = await window.API.get(`/properties/${propertyId}`);
+    const property = getResponseData(res, null);
 
-    const property = await apiRequest(`/properties/${propertyId}`);
+    if (!property) {
+      throw new Error("Property not found");
+    }
 
     renderPropertyDetails(property);
-
-  }catch(err){
-
+  } catch (err) {
     console.error(err);
-    notify?.("Failed to load property","error");
+    window.notify?.("Failed to load property", "error");
+  } finally {
+    window.hideLoader?.();
+  }
+}
 
-  }finally{
-    hideLoader?.();
+/* =================================================
+   RENDER PROPERTY DETAILS
+================================================= */
+
+function renderPropertyDetails(property) {
+  const container = document.getElementById("propertyDetails");
+  if (!container) return;
+
+  const id = property.property_id || property.id;
+  const images = Array.isArray(property.images) && property.images.length
+    ? property.images
+    : [{ image_url: property.image || "images/img1.jpg" }];
+
+  const gallery = document.getElementById("propertyGallery");
+
+  if (gallery) {
+    gallery.innerHTML = images
+      .map((img) => {
+        const src = resolveImagePath(img.image_url || img);
+        return `
+          <div class="swiper-slide">
+            <img
+              src="${escapeHTML(src)}"
+              alt="${escapeHTML(property.title || "Property")}"
+              onerror="this.src='images/img1.jpg'"
+            >
+          </div>
+        `;
+      })
+      .join("");
   }
 
+  container.innerHTML = `
+    <h1>${escapeHTML(property.title || "Untitled Property")}</h1>
+
+    <p class="muted-text">
+      ${escapeHTML([property.address, property.city, property.state].filter(Boolean).join(", "))}
+    </p>
+
+    <h2>${window.Utils?.formatCurrency?.(property.price) || `₹${Number(property.price || 0).toLocaleString("en-IN")}`}</h2>
+
+    <p>${escapeHTML(property.description || "No description available.")}</p>
+
+    <ul class="property-meta">
+      <li>Type: ${escapeHTML(property.type || "-")}</li>
+      <li>Listing: ${escapeHTML(property.listing_type || "-")}</li>
+      <li>Status: ${escapeHTML(property.status || "-")}</li>
+      <li>Bedrooms: ${escapeHTML(property.bedrooms ?? "-")}</li>
+      <li>Bathrooms: ${escapeHTML(property.bathrooms ?? "-")}</li>
+      <li>Area: ${escapeHTML(property.area ?? "-")} sq.ft</li>
+      <li>Views: ${escapeHTML(property.views ?? 0)}</li>
+    </ul>
+  `;
+
+  const price = document.getElementById("sidebarPrice");
+  const location = document.getElementById("sidebarLocation");
+
+  if (price) {
+    price.textContent =
+      window.Utils?.formatCurrency?.(property.price) ||
+      `₹${Number(property.price || 0).toLocaleString("en-IN")}`;
+  }
+
+  if (location) {
+    location.textContent = property.city || "-";
+  }
+
+  const saveBtn = document.getElementById("savePropertyBtn");
+
+  if (saveBtn) {
+    saveBtn.onclick = () => saveProperty(id);
+  }
+
+  if (typeof window.initBooking === "function") {
+    window.initBooking(id);
+  }
+
+  initSlider();
 }
 
 /* =================================================
-RENDER PROPERTY DETAILS
+   SAVE PROPERTY
 ================================================= */
 
-function renderPropertyDetails(property){
+async function saveProperty(propertyId) {
+  const user = window.Storage?.getUser?.();
 
-const container = document.getElementById("propertyDetails");
-if(!container) return;
+  if (!user) {
+    window.notify?.("Login to save properties", "error");
+    return;
+  }
 
-const id = property.property_id || property.id;
+  if (user.role !== "buyer") {
+    window.notify?.("Only buyers can save properties", "warning");
+    return;
+  }
 
-/* set gallery image */
+  try {
+    await window.API.post("/saved-properties", {
+      property_id: propertyId
+    });
 
-const gallery = document.getElementById("propertyGallery");
+    window.notify?.("Property saved", "success");
 
-if(gallery){
+    const btn = document.getElementById("savePropertyBtn");
 
-gallery.innerHTML = `
-<div class="swiper-slide">
-<img
-src="${property.image || 'images/img1.jpg'}"
-alt="${escapeHTML(property.title)}"
-onerror="this.src='images/img1.jpg'"
->
-</div>
-`;
-
-}
-
-container.innerHTML = `
-
-<h1>${escapeHTML(property.title)}</h1>
-
-<p class="muted-text">${escapeHTML(property.city)}</p>
-
-<h2>₹${Number(property.price).toLocaleString()}</h2>
-
-<p>${escapeHTML(property.description)}</p>
-
-<ul class="property-meta">
-<li>Type: ${escapeHTML(property.type)}</li>
-<li>Status: ${escapeHTML(property.status)}</li>
-</ul>
-
-`;
-
-const price = document.getElementById("sidebarPrice");
-const location = document.getElementById("sidebarLocation");
-
-if(price) price.textContent = `₹${Number(property.price).toLocaleString()}`;
-if(location) location.textContent = property.city;
-
-const saveBtn = document.getElementById("savePropertyBtn");
-
-if(saveBtn){
-saveBtn.onclick = () => saveProperty(id);
-}
-
-if(typeof initBooking === "function"){
-initBooking(id);
-}
-
+    if (btn) {
+      btn.textContent = "Saved ✓";
+      btn.disabled = true;
+    }
+  } catch (err) {
+    if (err.message === "Property already saved") {
+      window.notify?.("Already saved", "info");
+    } else {
+      window.notify?.(err.message || "Failed to save property", "error");
+    }
+  }
 }
 
 /* =================================================
-SAVE PROPERTY
+   SAVED PROPERTIES PAGE
 ================================================= */
 
-async function saveProperty(propertyId){
-
-const user = Storage?.getUser?.();
-
-if(!user){
-
-notify?.("Login to save properties","error");
-return;
-
-}
-
-try{
-
-await apiRequest("/saved-properties","POST",{
-property_id:propertyId
-});
-
-notify?.("Property saved","success");
-
-const btn = document.getElementById("savePropertyBtn");
-
-if(btn){
-btn.textContent = "Saved ✓";
-btn.disabled = true;
-}
-
-}catch(err){
-
-if(err.message === "Property already saved"){
-
-notify?.("Already saved","info");
-
-}else{
-
-notify?.("Failed to save property","error");
-
-}
-
-}
-
-}
-
-/* =================================================
-SAVED PROPERTIES PAGE
-================================================= */
-
-async function loadSavedProperties(){
-
+async function loadSavedProperties() {
   const container = document.getElementById("savedProperties");
-  if(!container) return;
+  if (!container) return;
 
-  try{
+  try {
+    const res = await window.API.get("/saved-properties");
+    const properties = getResponseData(res, []);
 
-    const properties = await apiRequest("/saved-properties");
-
-    if(!properties) return;
-
-    container.innerHTML = properties.map(renderPropertyCard).join("");
-
-  }catch(err){
+    container.innerHTML = properties.length
+      ? properties.map(renderPropertyCard).join("")
+      : `<p class="muted-text">No saved properties yet.</p>`;
+  } catch (err) {
     console.error(err);
+    container.innerHTML = `<p class="error-text">Failed to load saved properties.</p>`;
   }
-
 }
 
 /* =================================================
-RECOMMENDED PROPERTIES
+   RECOMMENDED PROPERTIES
 ================================================= */
 
-async function loadRecommended(){
-
+async function loadRecommended() {
   const container = document.getElementById("recommendedProperties");
-  if(!container) return;
+  if (!container) return;
 
-  try{
+  try {
+    let properties = [];
 
-    const properties = await apiRequest("/properties");
+    if (window.Storage?.isLoggedIn?.()) {
+      const res = await window.API.get("/recommendations");
+      properties = getResponseData(res, []);
+    } else {
+      const res = await window.API.get("/properties?limit=6");
+      properties = getResponseData(res, []);
+    }
 
-    const list = properties?.slice(0,6) || [];
-
-    container.innerHTML = list.map(renderPropertyCard).join("");
-
-  }catch(err){
+    container.innerHTML = properties.length
+      ? properties.slice(0, 6).map(renderPropertyCard).join("")
+      : `<p class="muted-text">No recommendations available.</p>`;
+  } catch (err) {
     console.error(err);
   }
-
 }
 
 /* =================================================
-RECENT PROPERTIES
+   RECENT PROPERTIES
 ================================================= */
 
-async function loadRecentProperties(){
-
+async function loadRecentProperties() {
   const container = document.getElementById("recentProperties");
-  if(!container) return;
+  if (!container) return;
 
-  try{
+  try {
+    const res = await window.API.get("/properties?limit=6");
+    const properties = getResponseData(res, []);
 
-    const properties = await apiRequest("/properties");
-
-    const list = properties?.slice(-6).reverse() || [];
-
-    container.innerHTML = list.map(renderPropertyCard).join("");
-
-  }catch(err){
+    container.innerHTML = properties.length
+      ? properties.slice(0, 6).map(renderPropertyCard).join("")
+      : `<p class="muted-text">No recent properties available.</p>`;
+  } catch (err) {
     console.error(err);
   }
-
-}
-
-async function loadSimilarProperties(){
-
-const container = document.getElementById("similarProperties");
-
-if(!container) return;
-
-try{
-
-const properties = await apiRequest("/properties");
-
-const list = properties?.slice(0,4) || [];
-
-container.innerHTML = list.map(renderPropertyCard).join("");
-
-}catch(err){
-
-console.error(err);
-
-}
-
 }
 
 /* =================================================
-HOMEPAGE STATS
+   SIMILAR PROPERTIES
 ================================================= */
 
-async function loadHomepageStats(){
+async function loadSimilarProperties() {
+  const container = document.getElementById("similarProperties");
+  if (!container) return;
 
-  try{
+  try {
+    const currentId = new URLSearchParams(window.location.search).get("id");
+    const res = await window.API.get("/properties?limit=4");
+    const properties = getResponseData(res, []).filter(
+      (p) => String(p.property_id) !== String(currentId)
+    );
 
-    const stats = await apiRequest("/dashboard/stats");
-
-    const prop = document.getElementById("statProperties");
-    const users = document.getElementById("statUsers");
-    const cities = document.getElementById("statCities");
-
-    if(prop) prop.textContent = stats.totalProperties || 0;
-    if(users) users.textContent = stats.totalUsers || 0;
-    if(cities) cities.textContent = stats.totalCities || 0;
-
-  }catch(err){
+    container.innerHTML = properties.length
+      ? properties.slice(0, 4).map(renderPropertyCard).join("")
+      : `<p class="muted-text">No similar properties available.</p>`;
+  } catch (err) {
     console.error(err);
   }
-
 }
 
 /* =================================================
-SWIPER
+   HOMEPAGE STATS
 ================================================= */
 
-function initSlider(){
+async function loadHomepageStats() {
+  const prop = document.getElementById("statProperties");
+  const users = document.getElementById("statUsers");
+  const cities = document.getElementById("statCities");
 
-  if(!document.querySelector(".property-slider")) return;
+  if (!prop && !users && !cities) return;
 
-  new Swiper(".property-slider",{
-    loop:true,
-    pagination:{ el:".swiper-pagination" }
-  });
+  try {
+    const res = await window.API.get("/dashboard/stats");
+    const stats = getResponseData(res, {});
 
+    if (prop) prop.textContent = stats.totalProperties || 0;
+    if (users) users.textContent = stats.totalUsers || 0;
+    if (cities) cities.textContent = stats.totalCities || 0;
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 /* =================================================
-XSS PROTECTION
+   SWIPER
 ================================================= */
 
-function escapeHTML(str){
+function initSlider() {
+  if (!document.querySelector(".property-slider")) return;
+  if (typeof Swiper === "undefined") return;
 
-  return str?.replace(/[&<>"']/g,function(m){
-
-    return({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    })[m];
-
+  new Swiper(".property-slider", {
+    loop: true,
+    pagination: {
+      el: ".swiper-pagination"
+    }
   });
-
 }
+
+/* =================================================
+   COMPARE FALLBACK
+================================================= */
+
+function toggleCompare(propertyId) {
+  let compareList = JSON.parse(localStorage.getItem("rems_compare") || "[]");
+
+  if (compareList.includes(propertyId)) {
+    compareList = compareList.filter((id) => id !== propertyId);
+    window.notify?.("Removed from comparison", "info");
+  } else {
+    if (compareList.length >= 5) {
+      window.notify?.("You can compare maximum 5 properties", "warning");
+      return;
+    }
+
+    compareList.push(propertyId);
+    window.notify?.("Added to comparison", "success");
+  }
+
+  localStorage.setItem("rems_compare", JSON.stringify(compareList));
+}
+
+/* expose globally */
+
+window.renderPropertyCard = renderPropertyCard;
+window.renderPropertyDetails = renderPropertyDetails;
+window.saveProperty = saveProperty;
+window.toggleCompare = window.toggleCompare || toggleCompare;
+window.loadFeaturedProperties = loadFeaturedProperties;
+window.loadSavedProperties = loadSavedProperties;
+window.loadRecommended = loadRecommended;

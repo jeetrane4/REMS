@@ -1,68 +1,108 @@
-const query = require("../utils/dbQuery");
+const { query } = require("../utils/dbQuery");
 
 /* =============================
-UPLOAD PROPERTY DOCUMENT
+   UPLOAD PROPERTY DOCUMENT
 ============================= */
 
-exports.uploadPropertyDocument = async (req,res,next)=>{
+exports.uploadPropertyDocument = async (req, res, next) => {
+  try {
+    const propertyId = req.params.property_id;
+    const { document_type } = req.body;
+    const userId = req.user.user_id || req.user.id;
 
-try{
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Document file is required"
+      });
+    }
 
-const property_id = req.params.property_id;
-const { document_type, document_url } = req.body;
+    const propertyRows = await query(
+      "SELECT owner_id FROM properties WHERE property_id = $1",
+      [propertyId]
+    );
 
-if(!document_type || !document_url){
-return res.status(400).json({
-success:false,
-message:"Document type and URL required"
-});
-}
+    if (propertyRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found"
+      });
+    }
 
-await query(
-`INSERT INTO property_documents(property_id,document_type,document_url)
-VALUES($1,$2,$3)`,
-[property_id,document_type,document_url]
-);
+    if (propertyRows[0].owner_id !== userId && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to upload documents for this property"
+      });
+    }
 
-res.status(201).json({
-success:true,
-message:"Property document uploaded"
-});
+    const documentUrl = `/uploads/documents/${req.file.filename}`;
 
-}
-catch(err){
-next(err);
-}
+    const rows = await query(
+      `INSERT INTO property_documents
+       (property_id, document_type, document_url)
+       VALUES ($1, $2, $3)
+       RETURNING id, property_id, document_type, document_url, status`,
+      [propertyId, document_type, documentUrl]
+    );
 
+    return res.status(201).json({
+      success: true,
+      message: "Property document uploaded successfully",
+      data: rows[0]
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-
 /* =============================
-GET PROPERTY DOCUMENTS
+   GET PROPERTY DOCUMENTS
 ============================= */
 
-exports.getPropertyDocuments = async (req,res,next)=>{
+exports.getPropertyDocuments = async (req, res, next) => {
+  try {
+    const propertyId = req.params.property_id;
+    const userId = req.user.user_id || req.user.id;
 
-try{
+    const propertyRows = await query(
+      "SELECT owner_id FROM properties WHERE property_id = $1",
+      [propertyId]
+    );
 
-const property_id = req.params.property_id;
+    if (propertyRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found"
+      });
+    }
 
-const documents = await query(
-`SELECT *
-FROM property_documents
-WHERE property_id=$1`,
-[property_id]
-);
+    if (propertyRows[0].owner_id !== userId && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to view documents for this property"
+      });
+    }
 
-res.json({
-success:true,
-count:documents.length,
-data:documents
-});
+    const documents = await query(
+      `SELECT
+        id,
+        property_id,
+        document_type,
+        document_url,
+        status
+       FROM property_documents
+       WHERE property_id = $1
+       ORDER BY id DESC`,
+      [propertyId]
+    );
 
-}
-catch(err){
-next(err);
-}
-
+    return res.status(200).json({
+      success: true,
+      count: documents.length,
+      data: documents
+    });
+  } catch (err) {
+    next(err);
+  }
 };

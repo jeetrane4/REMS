@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Property Documents – REMS</title>
+
+  <meta
+    name="description"
+    content="Upload and manage property ownership proof, title deed, tax receipt, building approval, and floor plan documents."
+  >
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+<header id="header"></header>
+
+<main class="section">
+  <div class="container">
+
+    <div class="section__header">
+      <h1>Property Documents</h1>
+
+      <p class="muted-text">
+        Upload ownership proof, title deed, tax receipt, building approval, or floor plan document.
+      </p>
+    </div>
+
+    <form
+      id="propertyDocumentForm"
+      class="card form-grid"
+      enctype="multipart/form-data"
+    >
+
+      <div class="form-group">
+        <label for="property_id">Property ID</label>
+
+        <input
+          type="number"
+          id="property_id"
+          name="property_id"
+          placeholder="Enter property ID"
+          required
+        >
+
+        <p class="muted-text small">
+          You can get Property ID from Manage Properties page or property URL.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="document_type">Document Type</label>
+
+        <select id="document_type" name="document_type" required>
+          <option value="">Select document</option>
+          <option value="ownership_proof">Ownership Proof</option>
+          <option value="title_deed">Title Deed</option>
+          <option value="tax_receipt">Tax Receipt</option>
+          <option value="building_approval">Building Approval</option>
+          <option value="floor_plan">Floor Plan</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="document">Upload Document</label>
+
+        <input
+          type="file"
+          id="document"
+          name="document"
+          accept=".jpg,.jpeg,.png,.webp,.pdf"
+          required
+        >
+
+        <p class="muted-text small">
+          Allowed: JPG, PNG, WEBP, PDF. Max size: 5MB.
+        </p>
+      </div>
+
+      <button
+        class="btn btn--primary"
+        type="submit"
+        id="propertyDocumentSubmitBtn">
+        Upload Property Document
+      </button>
+
+    </form>
+
+    <section class="section">
+      <div class="section__header">
+        <h2>Uploaded Documents</h2>
+
+        <button
+          type="button"
+          class="btn btn--outline"
+          id="loadDocumentsBtn">
+          Load Documents
+        </button>
+      </div>
+
+      <div class="table-responsive card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Property ID</th>
+              <th>Type</th>
+              <th>Document</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="propertyDocumentTable">
+            <tr>
+              <td colspan="5" class="loading-state">
+                Enter property ID and click Load Documents.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer id="footer"></footer>
+
+<button id="topBtn" class="btn btn-circle hidden" aria-label="Back to top">
+  ↑
+</button>
+
+<script src="js/core/storage.js" defer></script>
+<script src="js/core/utils.js" defer></script>
+<script src="js/core/api.js" defer></script>
+
+<script src="js/ui/loader.js" defer></script>
+<script src="js/ui/notifications.js" defer></script>
+<script src="js/ui/navbar.js" defer></script>
+<script src="js/ui/theme.js" defer></script>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", () => {
+  const propertyIdFromUrl = new URLSearchParams(window.location.search).get("property_id");
+  const propertyInput = document.getElementById("property_id");
+
+  if (propertyIdFromUrl && propertyInput) {
+    propertyInput.value = propertyIdFromUrl;
+    loadPropertyDocuments(propertyIdFromUrl);
+  }
+
+  bindPropertyDocumentForm();
+  bindLoadDocumentsButton();
+});
+
+function bindPropertyDocumentForm() {
+  const form = document.getElementById("propertyDocumentForm");
+
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const propertyId = document.getElementById("property_id")?.value;
+    const btn = document.getElementById("propertyDocumentSubmitBtn");
+
+    if (!propertyId) {
+      return window.notify?.("Property ID is required", "error");
+    }
+
+    if (btn) btn.disabled = true;
+
+    const formData = new FormData(form);
+
+    formData.delete("property_id");
+
+    try {
+      window.showLoader?.();
+
+      await window.API.upload(`/property-documents/${propertyId}`, formData);
+
+      window.notify?.("Property document uploaded successfully", "success");
+
+      document.getElementById("document_type").value = "";
+      document.getElementById("document").value = "";
+
+      await loadPropertyDocuments(propertyId);
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Failed to upload property document", "error");
+    } finally {
+      window.hideLoader?.();
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+function bindLoadDocumentsButton() {
+  const btn = document.getElementById("loadDocumentsBtn");
+
+  btn?.addEventListener("click", async () => {
+    const propertyId = document.getElementById("property_id")?.value;
+
+    if (!propertyId) {
+      return window.notify?.("Enter Property ID first", "error");
+    }
+
+    await loadPropertyDocuments(propertyId);
+  });
+}
+
+async function loadPropertyDocuments(propertyId) {
+  const table = document.getElementById("propertyDocumentTable");
+
+  if (!table) return;
+
+  try {
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" class="loading-state">
+          Loading documents...
+        </td>
+      </tr>
+    `;
+
+    const res = await window.API.get(`/property-documents/${propertyId}`);
+    const list = res?.data || [];
+
+    if (!list.length) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="5">No documents uploaded.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    table.innerHTML = list.map((d) => {
+      const documentLink = resolveFileUrl(d.document_url);
+
+      return `
+        <tr>
+          <td>${escapeHTML(d.id)}</td>
+          <td>${escapeHTML(d.property_id)}</td>
+          <td>${escapeHTML(d.document_type)}</td>
+          <td>
+            <a
+              class="table-link"
+              href="${escapeHTML(documentLink)}"
+              target="_blank"
+              rel="noopener">
+              View Document
+            </a>
+          </td>
+          <td>
+            <span class="badge ${getStatusClass(d.status)}">
+              ${escapeHTML(d.status || "pending")}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error(err);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="5">Failed to load documents.</td>
+      </tr>
+    `;
+
+    window.notify?.(err.message || "Failed to load documents", "error");
+  }
+}
+
+function resolveFileUrl(url) {
+  if (!url) return "#";
+
+  if (url.startsWith("http")) return url;
+
+  const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+
+  return `${base}${url}`;
+}
+
+function getStatusClass(status) {
+  if (status === "approved") return "badge--sale";
+  if (status === "rejected") return "badge--featured";
+  return "badge--rent";
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[m]);
+}
+</script>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

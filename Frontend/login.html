@@ -2,188 +2,163 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – REMS</title>
 
-<title>Login – REMS</title>
+  <meta
+    name="description"
+    content="Login to your REMS account to manage properties, bookings, saved listings, and transactions."
+  >
 
-<meta name="description"
-content="Login to your REMS account">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/forms.css">
-<link rel="stylesheet" href="css/animations.css">
-<link rel="stylesheet" href="css/responsive.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
 
-<header id="header"></header>
+  <header id="header"></header>
 
-<main class="auth-page">
+  <main class="auth-page">
+    <div class="auth-card card">
 
-<div class="auth-card card">
+      <h1 class="auth-title">Welcome Back</h1>
 
-<h1 class="auth-title">Welcome Back</h1>
+      <p class="muted-text center">
+        Login to manage your properties and bookings
+      </p>
 
-<p class="muted-text center">
+      <div
+        id="authMessage"
+        class="alert hidden"
+        aria-live="polite">
+      </div>
 
-Login to manage your properties and bookings
+      <form id="loginForm" novalidate>
 
-</p>
+        <div class="form-group">
+          <label for="email">
+            Email Address
+          </label>
 
-<div
-id="authMessage"
-class="alert hidden"
-aria-live="polite">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+            autocomplete="username"
+          >
+        </div>
 
-</div>
+        <div class="form-group">
+          <label for="password">
+            Password
+          </label>
 
-<form id="loginForm" novalidate>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter password"
+              required
+              autocomplete="current-password"
+            >
 
-<div class="form-group">
+            <button
+              type="button"
+              class="password-toggle"
+              data-target="password"
+              aria-label="Toggle password visibility">
+              👁
+            </button>
+          </div>
+        </div>
 
-<label for="email">
+        <div class="form-options">
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              name="rememberMe"
+            >
 
-Email Address
+            <span>Remember me</span>
+          </label>
 
-</label>
+          <a href="#" class="link-small">
+            Forgot password?
+          </a>
+        </div>
 
-<input
-type="email"
-id="email"
-name="email"
-placeholder="Enter your email"
-required
-autocomplete="username"
-/>
+        <button
+          type="submit"
+          class="btn btn--primary btn--block"
+          id="loginSubmitBtn">
+          Login
+        </button>
 
-</div>
+      </form>
 
-<div class="form-group">
+      <p class="auth-footer">
+        Don't have an account?
+        <a href="register.html">Register</a>
+      </p>
 
-<label for="password">
+    </div>
+  </main>
 
-Password
+  <footer id="footer"></footer>
 
-</label>
+  <button
+    id="topBtn"
+    class="btn btn-circle hidden"
+    aria-label="Back to top">
+    ↑
+  </button>
 
-<div class="password-wrapper">
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
 
-<input
-type="password"
-id="password"
-name="password"
-placeholder="Enter password"
-required
-autocomplete="current-password"
-/>
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/modals.js" defer></script>
 
-<button
-type="button"
-class="password-toggle"
-data-target="password"
-aria-label="Toggle password visibility"
->
+  <!-- Module JS -->
+  <script src="js/modules/auth.js" defer></script>
 
-👁
-
-</button>
-
-</div>
-
-</div>
-
-<div class="form-options">
-
-<label class="checkbox">
-
-<input
-type="checkbox"
-id="rememberMe">
-
-<span>
-
-Remember me
-
-</span>
-
-</label>
-
-<a
-href="#"
-class="link-small">
-
-Forgot password?
-
-</a>
-
-</div>
-
-<button
-type="submit"
-class="btn btn--primary btn--block"
-id="loginBtn">
-
-Login
-
-</button>
-
-</form>
-
-<p class="auth-footer">
-
-Don't have an account?
-
-<a href="register.html">
-
-Register
-
-</a>
-
-</p>
-
-</div>
-
-</main>
-
-<footer id="footer"></footer>
-
-<button
-id="topBtn"
-class="btn btn--circle hidden">
-
-↑
-
-</button>
-
-<!-- CORE -->
-
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
-
-<!-- UI -->
-
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/notifications.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/modals.js"></script>
-
-<!-- MODULE -->
-
-<script src="js/modules/auth.js"></script>
-
-<!-- MAIN -->
-
-<script src="js/main.js"></script>
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
 
 </body>
 </html>

@@ -3,220 +3,207 @@
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
+  initBookingFromPage();
 
-initBookingFromPage();
-
-const container = document.getElementById("bookingList");
-
-if(container){
-loadBookings();
-}
-
+  if (document.getElementById("bookingList")) {
+    loadBookings();
+  }
 });
 
 /* =============================
-INIT BOOKING FROM PROPERTY PAGE
+   RESPONSE HELPER
 ============================= */
 
-function initBookingFromPage(){
-
-const btn = document.getElementById("bookVisitBtn");
-
-if(!btn) return;
-
-const params = new URLSearchParams(window.location.search);
-
-const propertyId = params.get("id");
-
-if(!propertyId) return;
-
-initBooking(propertyId);
-
+function getResponseData(response, fallback = []) {
+  if (!response) return fallback;
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.data)) return response.data;
+  if (response.data && typeof response.data === "object") return response.data;
+  return fallback;
 }
 
 /* =============================
-BOOK PROPERTY
+   INIT BOOKING FROM PROPERTY PAGE
 ============================= */
 
-function initBooking(propertyId){
+function initBookingFromPage() {
+  const btn = document.getElementById("bookVisitBtn");
+  if (!btn) return;
 
-const btn = document.getElementById("bookVisitBtn");
+  const propertyId = new URLSearchParams(window.location.search).get("id");
+  if (!propertyId) return;
 
-if(!btn) return;
-
-btn.addEventListener("click", async ()=>{
-
-const user = Storage.getUser();
-
-if(!user){
-
-notify("Please login to book a visit","error");
-
-setTimeout(()=>{
-window.location.href="login.html";
-},1500);
-
-return;
-
-}
-
-btn.disabled = true;
-
-try{
-
-showLoader();
-
-await apiRequest("/bookings","POST",{
-property_id:propertyId
-});
-
-notify("Booking created successfully","success");
-
-/* 🔹 REDIRECT AFTER SUCCESS */
-
-setTimeout(()=>{
-window.location.href="bookings.html";
-},1200);
-
-}
-catch(err){
-
-console.error(err);
-notify(err.message || "Booking failed","error");
-
-}
-finally{
-
-hideLoader();
-btn.disabled = false;
-
-}
-
-});
-
+  initBooking(propertyId);
 }
 
 /* =============================
-LOAD BOOKINGS PAGE
+   BOOK PROPERTY
 ============================= */
 
-async function loadBookings(){
+function initBooking(propertyId) {
+  const btn = document.getElementById("bookVisitBtn");
+  if (!btn || btn.dataset.bookingBound === "true") return;
 
-const container = document.getElementById("bookingList");
+  btn.dataset.bookingBound = "true";
 
-if(!container) return;
+  btn.addEventListener("click", async () => {
+    const user = window.Storage?.getUser?.();
 
-try{
+    if (!user) {
+      window.notify?.("Please login to book a visit", "error");
 
-showLoader();
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1000);
 
-const bookings = await apiRequest("/bookings");
+      return;
+    }
 
-if(!bookings || bookings.length === 0){
+    if (user.role !== "buyer") {
+      window.notify?.("Only buyers can book properties", "warning");
+      return;
+    }
 
-container.innerHTML = `
-<div class="empty-state">
-No bookings yet.
-</div>
-`;
+    btn.disabled = true;
 
-return;
+    try {
+      window.showLoader?.();
 
-}
+      await window.API.post("/bookings", {
+        property_id: Number(propertyId)
+      });
 
-container.innerHTML = bookings.map(b => {
+      window.notify?.("Booking created successfully", "success");
 
-const statusClass = getStatusClass(b.status);
-
-return `
-
-<div class="booking-card card">
-
-<h3>${escapeHTML(b.title || "Property")}</h3>
-
-<p><strong>Booking Date:</strong> ${formatDate(b.booking_date)}</p>
-
-<p>
-<strong>Status:</strong>
-<span class="badge ${statusClass}">
-${b.status}
-</span>
-</p>
-
-<a href="listing-details.html?id=${b.property_id}"
-class="btn btn--outline btn--small">
-View Property
-</a>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-catch(err){
-
-console.error(err);
-notify("Failed to load bookings","error");
-
-}
-finally{
-
-hideLoader();
-
-}
-
+      setTimeout(() => {
+        window.location.href = "bookings.html";
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Booking failed", "error");
+    } finally {
+      window.hideLoader?.();
+      btn.disabled = false;
+    }
+  });
 }
 
 /* =============================
-STATUS BADGE
+   LOAD BOOKINGS PAGE
 ============================= */
 
-function getStatusClass(status){
+async function loadBookings() {
+  const container = document.getElementById("bookingList");
+  if (!container) return;
 
-if(!status) return "";
+  try {
+    window.showLoader?.();
 
-status = status.toLowerCase();
+    const res = await window.API.get("/bookings");
+    const bookings = getResponseData(res, []);
 
-if(status === "approved") return "badge--sale";
+    if (!bookings.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          No bookings yet.
+        </div>
+      `;
+      return;
+    }
 
-if(status === "pending") return "badge--rent";
-
-if(status === "rejected") return "badge--featured";
-
-return "";
-
+    container.innerHTML = bookings.map(renderBookingCard).join("");
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `
+      <div class="empty-state">
+        Failed to load bookings.
+      </div>
+    `;
+    window.notify?.("Failed to load bookings", "error");
+  } finally {
+    window.hideLoader?.();
+  }
 }
 
 /* =============================
-FORMAT DATE
+   RENDER BOOKING CARD
 ============================= */
 
-function formatDate(date){
+function renderBookingCard(booking) {
+  const statusClass = getStatusClass(booking.status);
+  const title = booking.title || booking.property_title || "Property";
 
-if(!date) return "-";
+  return `
+    <div class="booking-card card">
+      <h3>${escapeHTML(title)}</h3>
 
-return new Date(date).toLocaleDateString();
+      <p>
+        <strong>Booking Date:</strong>
+        ${window.Utils?.formatDate?.(booking.booking_date) || formatDate(booking.booking_date)}
+      </p>
 
+      <p>
+        <strong>Status:</strong>
+        <span class="badge ${statusClass}">
+          ${escapeHTML(booking.status || "pending")}
+        </span>
+      </p>
+
+      ${
+        booking.property_id
+          ? `<a href="listing-details.html?id=${booking.property_id}" class="btn btn--outline btn--small">
+              View Property
+            </a>`
+          : ""
+      }
+    </div>
+  `;
 }
 
 /* =============================
-XSS PROTECTION
+   STATUS BADGE
 ============================= */
 
-function escapeHTML(str){
+function getStatusClass(status) {
+  const value = String(status || "").toLowerCase();
 
-return str?.replace(/[&<>"']/g,function(m){
+  if (value === "confirmed") return "badge--sale";
+  if (value === "pending") return "badge--rent";
+  if (value === "cancelled") return "badge--featured";
 
-return({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-})[m];
-
-});
-
+  return "";
 }
+
+/* =============================
+   FORMAT DATE
+============================= */
+
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d)) return "-";
+  return d.toLocaleDateString("en-IN");
+}
+
+/* =============================
+   XSS PROTECTION
+============================= */
+
+function escapeHTML(value) {
+  const str = String(value ?? "");
+
+  return str.replace(/[&<>"']/g, (m) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
+}
+
+/* expose globally */
+
+window.initBooking = initBooking;
+window.loadBookings = loadBookings;

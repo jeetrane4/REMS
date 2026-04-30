@@ -4,44 +4,60 @@
 
 document.addEventListener("DOMContentLoaded", initLoan);
 
-function initLoan(){
+function initLoan() {
+  const btn = document.getElementById("applyLoanBtn");
+  if (!btn) return;
 
-const btn = document.getElementById("applyLoanBtn");
+  const propertyId = new URLSearchParams(window.location.search).get("id");
 
-if(!btn) return;
+  if (!propertyId) {
+    btn.disabled = true;
+    return;
+  }
 
-const params = new URLSearchParams(window.location.search);
+  btn.addEventListener("click", async () => {
+    const user = window.Storage?.getUser?.();
 
-const propertyId = params.get("id");
+    if (!user) {
+      window.notify?.("Please login to apply for loan", "error");
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1000);
+      return;
+    }
 
-btn.addEventListener("click", async ()=>{
+    if (user.role !== "buyer") {
+      window.notify?.("Only buyers can apply for loan", "warning");
+      return;
+    }
 
-const amount = prompt("Enter loan amount");
+    const loanAmount = prompt("Enter loan amount");
+    if (!loanAmount) return;
 
-if(!amount) return;
+    const annualIncome = prompt("Enter annual income", "500000") || "500000";
+    const employmentType = prompt("Enter employment type", "Salaried") || "Salaried";
 
-try{
+    btn.disabled = true;
 
-await apiRequest("/loan/apply","POST",{
+    try {
+      window.showLoader?.();
 
-property_id:propertyId,
-loan_amount:amount,
-annual_income:500000,
-employment_type:"Salaried"
+      await window.API.post("/loans/apply", {
+        property_id: Number(propertyId),
+        loan_amount: Number(loanAmount),
+        annual_income: Number(annualIncome),
+        employment_type: employmentType
+      });
 
-});
-
-notify("Loan application submitted","success");
-
+      window.notify?.("Loan application submitted successfully", "success");
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Loan application failed", "error");
+    } finally {
+      window.hideLoader?.();
+      btn.disabled = false;
+    }
+  });
 }
-catch(err){
 
-console.error(err);
-
-notify("Loan application failed","error");
-
-}
-
-});
-
-}
+window.initLoan = initLoan;

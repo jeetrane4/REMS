@@ -1,65 +1,68 @@
-const query = require("../utils/dbQuery");
+const { query } = require("../utils/dbQuery");
 
 /* =============================
-UPLOAD USER DOCUMENT
+   UPLOAD USER DOCUMENT
 ============================= */
 
-exports.uploadUserDocument = async (req,res,next)=>{
+exports.uploadUserDocument = async (req, res, next) => {
+  try {
+    const { document_type } = req.body;
+    const userId = req.user.user_id || req.user.id;
 
-try{
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Document file is required"
+      });
+    }
 
-const { document_type, document_url } = req.body;
+    const documentUrl = `/uploads/documents/${req.file.filename}`;
 
-if(!document_type || !document_url){
-return res.status(400).json({
-success:false,
-message:"Document type and URL required"
-});
-}
+    const rows = await query(
+      `INSERT INTO user_documents
+       (user_id, document_type, document_url)
+       VALUES ($1, $2, $3)
+       RETURNING id, document_type, document_url, status`,
+      [userId, document_type, documentUrl]
+    );
 
-await query(
-`INSERT INTO user_documents(user_id,document_type,document_url)
-VALUES($1,$2,$3)`,
-[req.user.id,document_type,document_url]
-);
-
-res.status(201).json({
-success:true,
-message:"User document uploaded"
-});
-
-}
-catch(err){
-next(err);
-}
-
+    return res.status(201).json({
+      success: true,
+      message: "User document uploaded successfully",
+      data: rows[0]
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-
 /* =============================
-GET USER DOCUMENTS
+   GET USER DOCUMENTS
 ============================= */
 
-exports.getUserDocuments = async (req,res,next)=>{
+exports.getUserDocuments = async (req, res, next) => {
+  try {
+    const userId = req.user.user_id || req.user.id;
 
-try{
+    const docs = await query(
+      `SELECT
+        id,
+        document_type,
+        document_url,
+        status,
+        created_at
+       FROM user_documents
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId]
+    );
 
-const docs = await query(
-`SELECT *
-FROM user_documents
-WHERE user_id=$1`,
-[req.user.id]
-);
-
-res.json({
-success:true,
-count:docs.length,
-data:docs
-});
-
-}
-catch(err){
-next(err);
-}
-
+    return res.status(200).json({
+      success: true,
+      count: docs.length,
+      data: docs
+    });
+  } catch (err) {
+    next(err);
+  }
 };

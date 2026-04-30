@@ -2,294 +2,388 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Property – REMS</title>
 
-<title>Add Property – REMS</title>
+  <meta
+    name="description"
+    content="List your property on REMS and connect with buyers and tenants."
+  >
 
-<meta name="description"
-content="List your property on REMS and connect with buyers and tenants">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/forms.css">
-<link rel="stylesheet" href="css/animations.css">
-<link rel="stylesheet" href="css/responsive.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
 
-<header id="header"></header>
-
-<main class="section">
-
-<div class="container">
-
-<div class="section__header">
-
-<h1>Add New Property</h1>
-
-<p class="muted-text">
-Fill the details to list your property
-</p>
-
-</div>
-
-<div id="formMessage" class="alert hidden"></div>
-
-<form id="addPropertyForm" class="card property-form">
-
-<!-- BASIC -->
-
-<section class="form-section">
-
-<h2>Basic Information</h2>
-
-<div class="form-group">
-
-<label for="title">Property Title</label>
-
-<input
-type="text"
-id="title"
-name="title"
-placeholder="Enter property title"
-required>
-
-</div>
-
-<div class="form-row">
-
-<div class="form-group">
-
-<label for="type">Property Type</label>
-
-<select id="type" name="type" aria-label="Property type" required>
-
-<option value="">Select</option>
-<option value="house">House</option>
-<option value="apartment">Apartment</option>
-<option value="villa">Villa</option>
-<option value="commercial">Commercial</option>
-
-</select>
-
-</div>
-
-<div class="form-group">
-
-<label for="price">Price</label>
-
-<input
-type="number"
-id="price"
-name="price"
-placeholder="Enter price"
-required>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- LOCATION -->
-
-<section class="form-section">
-
-<h2>Location</h2>
-
-<div class="form-group">
-
-<label for="city">City</label>
-
-<input
-type="text"
-id="city"
-name="city"
-placeholder="Enter city"
-required>
-
-</div>
-
-<div class="form-group">
-
-<label for="state">State</label>
-
-<input
-type="text"
-id="state"
-name="state"
-placeholder="Enter state"
-required>
-
-</div>
-
-<div class="form-group">
-
-<label for="address">Address</label>
-
-<textarea
-id="address"
-name="address"
-placeholder="Full address"
-rows="3"></textarea>
-
-</div>
-
-</section>
-
-<!-- DESCRIPTION -->
-
-<section class="form-section">
-
-<h2>Description</h2>
-
-<textarea
-id="description"
-name="description"
-placeholder="Describe the property"
-rows="4"></textarea>
-
-</section>
-
-<!-- MAP -->
-
-<section class="form-section">
-
-<h2>Select Location</h2>
-
-<div id="propertyMap" class="property-map"></div>
-
-<input
-type="hidden"
-name="latitude"
-id="latitude">
-
-<input
-type="hidden"
-name="longitude"
-id="longitude">
-
-</section>
-
-<!-- AMENITIES -->
-
-<section class="form-section">
-
-<h2>Amenities</h2>
-
-<div class="checkbox-grid">
-
-<label>
-<input type="checkbox" name="amenities" value="parking">
-Parking
-</label>
-
-<label>
-<input type="checkbox" name="amenities" value="wifi">
-WiFi
-</label>
-
-<label>
-<input type="checkbox" name="amenities" value="gym">
-Gym
-</label>
-
-<label>
-<input type="checkbox" name="amenities" value="pool">
-Pool
-</label>
-
-<label>
-<input type="checkbox" name="amenities" value="security">
-Security
-</label>
-
-</div>
-
-</section>
-
-<!-- IMAGES -->
-
-<section class="form-section">
-
-<h2>Upload Images</h2>
-
-<label for="images">Property Images</label>
-
-<input
-type="file"
-id="images"
-name="images"
-multiple
-accept="image/*"
-aria-label="Upload property images">
-
-<div
-id="imagePreview"
-class="image-preview-grid">
-
-</div>
-
-</section>
-
-<!-- SUBMIT -->
-
-<div class="form-actions">
-
-<button
-type="submit"
-class="btn btn--primary btn--large">
-
-Submit Property
-
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</main>
-
-<footer id="footer"></footer>
-
-<button
-id="topBtn"
-class="btn btn--circle hidden"
-type="button">
-
-↑
-
-</button>
-
-<!-- CORE -->
-
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
-
-<!-- UI -->
-
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/notifications.js"></script>
-
-<!-- MODULES -->
-
-<script src="js/modules/properties.js"></script>
-
-<!-- MAIN -->
-
-<script src="js/main.js"></script>
+  <header id="header"></header>
+
+  <main class="section">
+    <div class="container">
+
+      <div class="section__header">
+        <h1>Add New Property</h1>
+
+        <p class="muted-text">
+          Fill the details to list your property. Only sellers, agents, and admins can add properties.
+        </p>
+      </div>
+
+      <div id="formMessage" class="alert hidden" aria-live="polite"></div>
+
+      <form id="addPropertyForm" class="card property-form">
+
+        <!-- BASIC -->
+        <section class="form-section">
+          <h2>Basic Information</h2>
+
+          <div class="form-group">
+            <label for="title">Property Title</label>
+
+            <input
+              type="text"
+              id="title"
+              name="title"
+              placeholder="Enter property title"
+              required
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="type">Property Type</label>
+
+              <select id="type" name="type" aria-label="Property type" required>
+                <option value="">Select</option>
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+                <option value="villa">Villa</option>
+                <option value="commercial">Commercial</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="listing_type">Listing Type</label>
+
+              <select id="listing_type" name="listing_type" aria-label="Listing type" required>
+                <option value="sale">Sale</option>
+                <option value="rent">Rent</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="price">Price</label>
+
+              <input
+                type="number"
+                id="price"
+                name="price"
+                placeholder="Enter price"
+                min="0"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bedrooms">Bedrooms</label>
+
+              <input
+                type="number"
+                id="bedrooms"
+                name="bedrooms"
+                placeholder="Bedrooms"
+                min="0"
+                value="0"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="bathrooms">Bathrooms</label>
+
+              <input
+                type="number"
+                id="bathrooms"
+                name="bathrooms"
+                placeholder="Bathrooms"
+                min="0"
+                value="0"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="area">Area</label>
+
+              <input
+                type="number"
+                id="area"
+                name="area"
+                placeholder="Area in sq.ft"
+                min="0"
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- LOCATION -->
+        <section class="form-section">
+          <h2>Location</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City</label>
+
+              <input
+                type="text"
+                id="city"
+                name="city"
+                placeholder="Enter city"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="state">State</label>
+
+              <input
+                type="text"
+                id="state"
+                name="state"
+                placeholder="Enter state"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="pincode">Pincode</label>
+
+              <input
+                type="text"
+                id="pincode"
+                name="pincode"
+                placeholder="Enter pincode"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Address</label>
+
+            <textarea
+              id="address"
+              name="address"
+              placeholder="Full address"
+              rows="3"
+            ></textarea>
+          </div>
+        </section>
+
+        <!-- DESCRIPTION -->
+        <section class="form-section">
+          <h2>Description</h2>
+
+          <div class="form-group">
+            <label for="description">Property Description</label>
+
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Describe the property"
+              rows="4"
+            ></textarea>
+          </div>
+        </section>
+
+        <!-- MAP / COORDINATES -->
+        <section class="form-section">
+          <h2>Location Coordinates</h2>
+
+          <p class="muted-text small">
+            Optional: enter latitude and longitude if you want this property to appear in map search.
+          </p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="latitude">Latitude</label>
+
+              <input
+                type="number"
+                step="any"
+                name="latitude"
+                id="latitude"
+                placeholder="Example: 21.1702"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="longitude">Longitude</label>
+
+              <input
+                type="number"
+                step="any"
+                name="longitude"
+                id="longitude"
+                placeholder="Example: 72.8311"
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- AMENITIES -->
+        <section class="form-section">
+          <h2>Amenities</h2>
+
+          <div class="checkbox-grid">
+            <label>
+              <input type="checkbox" name="amenities" value="parking">
+              Parking
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="wifi">
+              WiFi
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="gym">
+              Gym
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="pool">
+              Pool
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="security">
+              Security
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="lift">
+              Lift
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="garden">
+              Garden
+            </label>
+
+            <label>
+              <input type="checkbox" name="amenities" value="power_backup">
+              Power Backup
+            </label>
+          </div>
+        </section>
+
+        <!-- IMAGES -->
+        <section class="form-section">
+          <h2>Upload Images</h2>
+
+          <div class="form-group">
+            <label for="images">Property Images</label>
+
+            <input
+              type="file"
+              id="images"
+              name="images"
+              multiple
+              accept="image/jpeg,image/png,image/webp"
+              aria-label="Upload property images"
+            >
+          </div>
+
+          <div id="imagePreview" class="image-preview-grid"></div>
+        </section>
+
+        <!-- SUBMIT -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn--primary btn--large"
+            id="submitPropertyBtn">
+            Submit Property
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+
+  <button
+    id="topBtn"
+    class="btn btn-circle hidden"
+    type="button"
+    aria-label="Back to top">
+    ↑
+  </button>
+
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
+
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
+
+  <!-- Modules -->
+  <script src="js/modules/properties.js" defer></script>
+
+  <!-- Image Preview -->
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("images");
+      const preview = document.getElementById("imagePreview");
+
+      input?.addEventListener("change", () => {
+        if (!preview) return;
+
+        preview.innerHTML = "";
+
+        Array.from(input.files || []).slice(0, 10).forEach((file) => {
+          const img = document.createElement("img");
+          img.src = URL.createObjectURL(file);
+          img.alt = file.name;
+          img.onload = () => URL.revokeObjectURL(img.src);
+          preview.appendChild(img);
+        });
+      });
+    });
+  </script>
+
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
 
 </body>
 </html>

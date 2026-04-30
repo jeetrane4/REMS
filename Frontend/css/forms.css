@@ -1,323 +1,305 @@
 /* ===============================
-AUTH PAGE LAYOUT
-=================================*/
+   AUTH PAGE LAYOUT
+================================= */
 
-.auth-page{
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-display:flex;
-justify-content:center;
-align-items:center;
+  min-height: 80vh;
 
-min-height:80vh;
-
-padding:var(--space-xl);
-
+  padding: var(--space-xl);
 }
 
-.auth-card{
+.auth-card {
+  width: 100%;
+  max-width: 420px;
 
-width:100%;
-max-width:420px;
+  padding: var(--space-xl);
 
-padding:var(--space-xl);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
 
+  box-shadow: var(--shadow-md);
 }
 
-.auth-title{
-
-text-align:center;
-margin-bottom:var(--space-sm);
-
+.auth-title {
+  text-align: center;
+  margin-bottom: var(--space-sm);
 }
 
-.auth-footer{
-
-text-align:center;
-margin-top:var(--space-lg);
-
+.auth-footer {
+  text-align: center;
+  margin-top: var(--space-lg);
 }
-
-
 
 /* ===============================
-FORM SYSTEM
-=================================*/
+   FORM SYSTEM
+================================= */
 
-.form-group{
-
-margin-bottom:var(--space-lg);
-
+.form-group {
+  margin-bottom: var(--space-lg);
 }
 
-label{
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
 
-display:block;
-font-weight:500;
+  margin-bottom: 6px;
 
-margin-bottom:6px;
-
+  color: var(--color-text-secondary);
 }
 
-
-/* INPUTS */
+/* ===============================
+   INPUTS (PREMIUM STYLE)
+================================= */
 
 input,
 textarea,
-select{
+select {
+  width: 100%;
 
-width:100%;
+  padding: 12px 14px;
 
-padding:12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 
-border:1px solid var(--color-border);
-border-radius:var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 
-background:var(--color-surface);
+  font-size: 14px;
 
-color:var(--color-text-primary);
-
-font-size:14px;
-
-transition:var(--transition);
-
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-
-/* INPUT STATES */
+/* HOVER */
 
 input:hover,
 textarea:hover,
-select:hover{
-
-border-color:var(--color-text-muted);
-
+select:hover {
+  border-color: var(--color-text-muted);
 }
+
+/* FOCUS */
 
 input:focus,
 textarea:focus,
-select:focus{
+select:focus {
+  outline: none;
 
-outline:none;
+  border-color: var(--color-primary);
 
-border-color:var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 
-box-shadow:0 0 0 3px rgba(37,99,235,0.15);
-
+  transform: scale(1.01);
 }
+
+/* DISABLED */
 
 input:disabled,
 textarea:disabled,
-select:disabled{
-
-background:var(--color-surface-2);
-cursor:not-allowed;
-
+select:disabled {
+  background: var(--color-surface-2);
+  cursor: not-allowed;
 }
 
+/* ERROR STATE */
+
+input.error,
+textarea.error,
+select.error {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+/* SUCCESS STATE */
+
+input.success,
+textarea.success,
+select.success {
+  border-color: var(--color-success);
+}
 
 /* TEXTAREA */
 
-textarea{
-
-resize:vertical;
-min-height:100px;
-
-}
-
-
-
-/* ===============================
-PASSWORD
-=================================*/
-
-.password-wrapper{
-position:relative;
-}
-
-.password-toggle{
-
-position:absolute;
-
-right:10px;
-top:50%;
-
-transform:translateY(-50%);
-
-background:none;
-border:none;
-
-cursor:pointer;
-
-font-size:16px;
-
-color:var(--color-text-secondary);
-
-}
-
-
-
-/* ===============================
-FORM LAYOUT UTILITIES
-=================================*/
-
-.form-row{
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:var(--space-lg);
-
-}
-
-.form-grid{
-
-display:grid;
-gap:var(--space-lg);
-
-}
-
-.form-actions{
-
-margin-top:var(--space-lg);
-
-display:flex;
-gap:var(--space-md);
-
-flex-wrap:wrap;
-
-}
-
-
-
-/* ===============================
-CHECKBOX SYSTEM
-=================================*/
-
-.checkbox{
-
-display:flex;
-align-items:center;
-
-gap:6px;
-
-font-size:14px;
-
-}
-
-.checkbox input{
-width:auto;
-}
-
-
-/* CHECKBOX GRID (Amenities) */
-
-.checkbox-grid{
-
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-gap:10px;
-margin-top:var(--space-sm);
-}
-
-.checkbox-grid label{
-display:flex;
-align-items:center;
-gap:8px;
-cursor:pointer;
-font-size:14px;
-}
-
-.checkbox-grid input[type="checkbox"]{
-width:16px;
-height:16px;
-margin:0;
-accent-color:var(--primary-color);
-}
-
-
-/* ===============================
-IMAGE PREVIEW GRID
-=================================*/
-
-.image-preview-grid{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-
-gap:10px;
-
-margin-top:10px;
-
-}
-
-.image-preview-grid img{
-
-width:100%;
-height:100px;
-
-object-fit:cover;
-
-border-radius:var(--radius-sm);
-
-border:1px solid var(--color-border);
-
-}
-
-.image-preview{
-margin-top:20px;
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-gap:10px;
-}
-
-.image-preview img{
-width:100%;
-border-radius:var(--radius-sm);
-object-fit:cover;
+textarea {
+  resize: vertical;
+  min-height: 110px;
 }
 
 /* ===============================
-FORM OPTIONS
-=================================*/
+   PASSWORD FIELD
+================================= */
 
-.form-options{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-margin-bottom:var(--space-lg);
-
-flex-wrap:wrap;
-
-gap:var(--space-sm);
-
+.password-wrapper {
+  position: relative;
 }
 
+.password-toggle {
+  position: absolute;
 
+  right: 10px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+  color: var(--color-text-secondary);
+
+  transition: color var(--transition-fast);
+}
+
+.password-toggle:hover {
+  color: var(--color-primary);
+}
 
 /* ===============================
-ERROR / SUCCESS
-=================================*/
+   FORM LAYOUT UTILITIES
+================================= */
 
-.form-error{
-
-color:var(--color-error);
-
-font-size:13px;
-
-margin-top:4px;
-
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
 }
 
-.form-success{
+.form-grid {
+  display: grid;
+  gap: var(--space-lg);
+}
 
-color:var(--color-success);
+.form-actions {
+  margin-top: var(--space-lg);
 
-font-size:13px;
+  display: flex;
+  gap: var(--space-md);
 
-margin-top:4px;
+  flex-wrap: wrap;
+}
 
+/* ===============================
+   CHECKBOX SYSTEM (MODERN)
+================================= */
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+
+  accent-color: var(--color-primary);
+}
+
+/* ===============================
+   CHECKBOX GRID (Amenities)
+================================= */
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: var(--space-sm);
+}
+
+.checkbox-grid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  cursor: pointer;
+
+  padding: 8px 10px;
+
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+
+  transition: all var(--transition-fast);
+}
+
+.checkbox-grid label:hover {
+  background: var(--color-surface-2);
+}
+
+.checkbox-grid input[type="checkbox"] {
+  accent-color: var(--color-primary);
+}
+
+/* ===============================
+   IMAGE PREVIEW GRID
+================================= */
+
+.image-preview-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+.image-preview-grid img {
+  width: 100%;
+  height: 100px;
+
+  object-fit: cover;
+
+  border-radius: var(--radius-sm);
+
+  border: 1px solid var(--color-border);
+
+  transition: transform var(--transition-fast);
+}
+
+.image-preview-grid img:hover {
+  transform: scale(1.05);
+}
+
+/* ===============================
+   FORM OPTIONS
+================================= */
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: var(--space-lg);
+
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* ===============================
+   ERROR / SUCCESS TEXT
+================================= */
+
+.form-error {
+  color: var(--color-error);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.form-success {
+  color: var(--color-success);
+  font-size: 13px;
+  margin-top: 4px;
 }

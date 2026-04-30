@@ -4,276 +4,248 @@
 
 document.addEventListener("DOMContentLoaded", initDashboard);
 
+async function initDashboard() {
+  const token = window.Storage?.getToken?.();
+  const user = window.Storage?.getUser?.();
 
-async function initDashboard(){
+  if (!token || !user) {
+    window.location.href = "login.html";
+    return;
+  }
 
-const token = Storage.getToken();
-const user = Storage.getUser();
+  setGreeting(user);
+  applyRoleUI(user);
 
-if(!token || !user){
-
-window.location.href="login.html";
-return;
-
+  await loadDashboardSummary(user);
+  await loadRecentActivity();
 }
-
-setGreeting(user);
-
-applyRoleUI(user);
-
-await loadDashboardSummary(user);
-
-await loadRecentActivity();
-
-}
-
-
 
 /* =============================
-USER GREETING
+   RESPONSE HELPER
 ============================= */
 
-function setGreeting(user){
-
-const title = document.getElementById("dashboardTitle");
-const subtitle = document.getElementById("dashboardSubtitle");
-
-if(!user) return;
-
-if(title){
-title.textContent = `Welcome back, ${user.name} 👋`;
+function getResponseData(response, fallback = null) {
+  if (!response) return fallback;
+  if (response.data !== undefined) return response.data;
+  return response;
 }
-
-if(subtitle){
-subtitle.textContent = "Manage your activities and overview";
-}
-
-}
-
-
 
 /* =============================
-ROLE BASED UI
+   USER GREETING
 ============================= */
 
-function applyRoleUI(user){
+function setGreeting(user) {
+  const title = document.getElementById("dashboardTitle");
+  const subtitle = document.getElementById("dashboardSubtitle");
 
-if(!user) return;
+  if (!user) return;
 
-const role = user.role;
+  if (title) {
+    title.textContent = `Welcome back, ${user.name || user.user_name || "User"} 👋`;
+  }
 
-document.querySelectorAll("[data-role]").forEach(el=>{
-
-const allowed = el.getAttribute("data-role").split(",");
-
-if(!allowed.includes(role)){
-el.style.display = "none";
+  if (subtitle) {
+    subtitle.textContent = "Manage your activities and overview";
+  }
 }
-
-});
-
-}
-
-
 
 /* =============================
-LOAD DASHBOARD SUMMARY
+   ROLE BASED UI
 ============================= */
 
-async function loadDashboardSummary(user){
+function applyRoleUI(user) {
+  if (!user) return;
 
-const container = document.getElementById("dashboardSummary");
+  const role = String(user.role || "").toLowerCase();
 
-if(!container) return;
+  document.body.dataset.role = role;
 
-try{
+  document.querySelectorAll("[data-role]").forEach((el) => {
+    const allowed = el
+      .getAttribute("data-role")
+      .split(",")
+      .map((item) => item.trim().toLowerCase());
 
-showLoader?.();
-
-const summary = await apiRequest("/dashboard");
-
-renderStats(container, summary, user.role);
-
+    if (!allowed.includes(role)) {
+      el.style.display = "none";
+    }
+  });
 }
-catch(err){
-
-console.error(err);
-
-container.innerHTML = `
-<div class="empty-state">
-Failed to load dashboard data
-</div>
-`;
-
-notify?.("Failed to load dashboard summary","error");
-
-}
-finally{
-
-hideLoader?.();
-
-}
-
-}
-
-
 
 /* =============================
-RENDER STATS
+   LOAD DASHBOARD SUMMARY
 ============================= */
 
-function renderStats(container, summary, role){
+async function loadDashboardSummary(user) {
+  const container = document.getElementById("dashboardSummary");
+  if (!container) return;
 
-let stats = [];
+  try {
+    window.showLoader?.();
 
-if(role === "buyer"){
+    const res = await window.API.get("/dashboard");
+    const summary = getResponseData(res, {});
 
-stats = [
+    renderStats(container, summary, user.role);
+  } catch (err) {
+    console.error(err);
 
-{title:"My Bookings", value:summary.totalBookings || 0, icon:"📅"},
-{title:"Saved Properties", value:summary.savedProperties || 0, icon:"❤️"}
+    container.innerHTML = `
+      <div class="empty-state">
+        Failed to load dashboard data
+      </div>
+    `;
 
-];
-
+    window.notify?.("Failed to load dashboard summary", "error");
+  } finally {
+    window.hideLoader?.();
+  }
 }
-
-else if(role === "seller" || role === "agent"){
-
-stats = [
-
-{title:"My Properties", value:summary.totalProperties || 0, icon:"🏠"},
-{title:"Bookings Received", value:summary.totalBookings || 0, icon:"📅"},
-{title:"Transactions", value:summary.totalTransactions || 0, icon:"💰"}
-
-];
-
-}
-
-else if(role === "admin"){
-
-stats = [
-
-{title:"Total Users", value:summary.totalUsers || 0, icon:"👥"},
-{title:"Total Properties", value:summary.totalProperties || 0, icon:"🏠"},
-{title:"Total Transactions", value:summary.totalTransactions || 0, icon:"💳"},
-{title:"Total Bookings", value:summary.totalBookings || 0, icon:"📅"}
-
-];
-
-}
-
-container.innerHTML = stats
-.map(stat => createStatCard(stat.title, stat.value, stat.icon))
-.join("");
-
-}
-
-
 
 /* =============================
-CREATE STAT CARD
+   RENDER STATS
 ============================= */
 
-function createStatCard(title, value, icon){
+function renderStats(container, summary, role) {
+  let stats = [];
 
-return `
+  const userRole = String(role || "").toLowerCase();
 
-<div class="dashboard-card">
+  if (userRole === "buyer") {
+    stats = [
+      { title: "My Bookings", value: summary.totalBookings || 0, icon: "📅" },
+      { title: "Saved Properties", value: summary.totalSavedProperties || 0, icon: "❤️" },
+      { title: "Transactions", value: summary.totalTransactions || 0, icon: "💳" }
+    ];
+  } else if (userRole === "seller" || userRole === "agent") {
+    stats = [
+      { title: "My Properties", value: summary.totalProperties || 0, icon: "🏠" },
+      { title: "Total Views", value: summary.totalViews || 0, icon: "👁️" },
+      { title: "Bookings Received", value: summary.totalBookings || 0, icon: "📅" },
+      { title: "Transactions", value: summary.totalTransactions || 0, icon: "💰" }
+    ];
+  } else if (userRole === "admin") {
+    stats = [
+      { title: "Total Users", value: summary.totalUsers || 0, icon: "👥" },
+      { title: "Total Properties", value: summary.totalProperties || 0, icon: "🏠" },
+      { title: "Total Transactions", value: summary.totalTransactions || 0, icon: "💳" },
+      { title: "Total Bookings", value: summary.totalBookings || 0, icon: "📅" },
+      {
+        title: "Revenue",
+        value:
+          window.Utils?.formatCurrency?.(summary.totalRevenue) ||
+          `₹${Number(summary.totalRevenue || 0).toLocaleString("en-IN")}`,
+        icon: "💰"
+      }
+    ];
+  }
 
-<div class="dashboard-stat-icon">${icon}</div>
-
-<h4>${title}</h4>
-
-<p class="dashboard-stat">${value}</p>
-
-</div>
-
-`;
-
+  container.innerHTML = stats.length
+    ? stats.map((stat) => createStatCard(stat.title, stat.value, stat.icon)).join("")
+    : `<div class="empty-state">No dashboard stats available</div>`;
 }
-
-
 
 /* =============================
-RECENT ACTIVITY
+   CREATE STAT CARD
 ============================= */
 
-async function loadRecentActivity(){
-
-const container = document.getElementById("recentActivity");
-
-if(!container) return;
-
-try{
-
-const activities = await apiRequest("/dashboard/activity");
-
-if(!activities || activities.length === 0){
-
-container.innerHTML = "<p class='muted-text'>No recent activity</p>";
-return;
-
+function createStatCard(title, value, icon) {
+  return `
+    <div class="dashboard-card">
+      <div class="dashboard-stat-icon">${escapeHTML(icon)}</div>
+      <h4>${escapeHTML(title)}</h4>
+      <p class="dashboard-stat">${escapeHTML(value)}</p>
+    </div>
+  `;
 }
-
-container.innerHTML = activities.map(a => `
-
-<div class="activity-item">
-
-<strong>${escapeHTML(a.title)}</strong>
-
-<p class="muted-text">${escapeHTML(a.description)}</p>
-
-<span class="activity-time">${formatActivityTime(a.time)}</span>
-
-</div>
-
-`).join("");
-
-}
-catch(err){
-
-console.error(err);
-
-container.innerHTML = "<p class='muted-text'>No recent activity</p>";
-
-}
-
-}
-
-
 
 /* =============================
-FORMAT ACTIVITY TIME
+   RECENT ACTIVITY
 ============================= */
 
-function formatActivityTime(date){
+async function loadRecentActivity() {
+  const container = document.getElementById("recentActivity");
+  if (!container) return;
 
-if(!date) return "";
+  try {
+    const res = await window.API.get("/dashboard/activity");
+    const activities = Array.isArray(res?.data) ? res.data : [];
 
-return new Date(date).toLocaleString();
+    if (!activities.length) {
+      container.innerHTML = "<p class='muted-text'>No recent activity</p>";
+      return;
+    }
 
+    container.innerHTML = activities
+      .map((activity) => {
+        const title = activity.title || capitalize(activity.type || "Activity");
+        const description = activity.description || "Recent system activity";
+        const time = activity.created_at || activity.time;
+
+        return `
+          <div class="activity-item">
+            <strong>${escapeHTML(title)}</strong>
+            <p class="muted-text">${escapeHTML(description)}</p>
+            <span class="activity-time">${escapeHTML(formatActivityTime(time))}</span>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<p class='muted-text'>No recent activity</p>";
+  }
 }
-
-
 
 /* =============================
-XSS PROTECTION
+   FORMAT ACTIVITY TIME
 ============================= */
 
-function escapeHTML(str){
+function formatActivityTime(date) {
+  if (!date) return "";
 
-return str?.replace(/[&<>"']/g,function(m){
+  const d = new Date(date);
 
-return({
+  if (isNaN(d)) return "";
 
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-
-})[m];
-
-});
-
+  return d.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 }
+
+/* =============================
+   TEXT HELPERS
+============================= */
+
+function capitalize(text) {
+  const str = String(text || "");
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/* =============================
+   XSS PROTECTION
+============================= */
+
+function escapeHTML(value) {
+  const str = String(value ?? "");
+
+  return str.replace(/[&<>"']/g, (m) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
+}
+
+/* expose globally */
+
+window.initDashboard = initDashboard;
+window.loadDashboardSummary = loadDashboardSummary;
+window.loadRecentActivity = loadRecentActivity;

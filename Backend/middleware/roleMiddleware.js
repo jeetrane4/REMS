@@ -1,28 +1,39 @@
 /*
   Role Authorization Middleware
-  Example:
-  router.get("/admin", protect, authorize(["admin"]), controller)
+
+  Usage:
+  authorize("admin")
+  authorize(["admin", "agent"])
 */
 
-module.exports = function authorize(roles = []) {
+const authorize = (roles = []) => {
+  // Ensure roles is always an array
+  if (!Array.isArray(roles)) {
+    roles = [roles];
+  }
+
+  // Normalize roles to lowercase
+  const allowedRoles = roles.map(r => r.toLowerCase());
 
   return (req, res, next) => {
-
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized"
+        message: "Unauthorized: No user data found"
       });
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userRole = (req.user.role || "").toLowerCase();
+
+    if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({
         success: false,
-        message: "Access denied"
+        message: "Access denied: Insufficient permissions"
       });
     }
 
     next();
   };
-
 };
+
+module.exports = authorize;

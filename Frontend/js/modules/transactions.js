@@ -6,263 +6,250 @@ document.addEventListener("DOMContentLoaded", initTransactions);
 
 let allTransactions = [];
 
-
 /* =============================
-INIT
+   INIT
 ============================= */
 
-async function initTransactions(){
+async function initTransactions() {
+  const table = document.getElementById("transactionTable");
+  if (!table) return;
 
-const table = document.getElementById("transactionTable");
-
-if(!table) return;
-
-initFilters();
-
-await loadTransactions();
-
+  initFilters();
+  await loadTransactions();
 }
-
 
 /* =============================
-LOAD TRANSACTIONS
+   RESPONSE HELPER
 ============================= */
 
-async function loadTransactions(){
-
-const table = document.getElementById("transactionTable");
-
-try{
-
-showLoader?.();
-
-table.innerHTML = `
-<tr>
-<td colspan="6" class="loading-state">
-Loading transactions...
-</td>
-</tr>
-`;
-
-const transactions = await apiRequest("/transactions");
-
-allTransactions = transactions || [];
-
-renderTransactions(allTransactions);
-
+function getResponseData(response, fallback = []) {
+  if (!response) return fallback;
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.data)) return response.data;
+  return fallback;
 }
-catch(err){
-
-console.error(err);
-
-notify?.("Failed to load transactions","error");
-
-table.innerHTML = `
-<tr>
-<td colspan="6">Failed to load transactions</td>
-</tr>
-`;
-
-}
-finally{
-
-hideLoader?.();
-
-}
-
-}
-
-
 
 /* =============================
-RENDER TABLE
+   LOAD TRANSACTIONS
 ============================= */
 
-function renderTransactions(list){
+async function loadTransactions() {
+  const table = document.getElementById("transactionTable");
 
-const table = document.getElementById("transactionTable");
+  try {
+    window.showLoader?.();
 
-if(!list || list.length === 0){
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="loading-state">
+          Loading transactions...
+        </td>
+      </tr>
+    `;
 
-table.innerHTML = `
-<tr>
-<td colspan="6">No transactions found</td>
-</tr>
-`;
+    const res = await window.API.get("/transactions");
 
-return;
+    allTransactions = getResponseData(res, []);
 
+    renderTransactions(allTransactions);
+  } catch (err) {
+    console.error(err);
+
+    window.notify?.("Failed to load transactions", "error");
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">Failed to load transactions</td>
+      </tr>
+    `;
+  } finally {
+    window.hideLoader?.();
+  }
 }
-
-table.innerHTML = list.map(t => {
-
-const propertyTitle = t.title || "Property";
-const buyer = t.user_name || t.buyer || "User";
-
-return `
-
-<tr>
-
-<td>${t.transaction_id}</td>
-
-<td>
-<a href="listing-details.html?id=${t.property_id}" class="table-link">
-${escapeHTML(propertyTitle)}
-</a>
-</td>
-
-<td>${escapeHTML(buyer)}</td>
-
-<td>${formatCurrency(t.amount)}</td>
-
-<td>${formatDate(t.transaction_date)}</td>
-
-<td>
-<span class="badge ${getStatusClass(t.payment_status)}">
-${escapeHTML(t.payment_status || "pending")}
-</span>
-</td>
-
-</tr>
-
-`;
-
-}).join("");
-
-}
-
-
 
 /* =============================
-FILTER SYSTEM
+   RENDER TABLE
 ============================= */
 
-function initFilters(){
+function renderTransactions(list) {
+  const table = document.getElementById("transactionTable");
+  if (!table) return;
 
-const searchInput = document.getElementById("searchTransaction");
-const statusFilter = document.getElementById("statusFilter");
+  if (!list || list.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">No transactions found</td>
+      </tr>
+    `;
+    return;
+  }
 
-if(searchInput){
+  table.innerHTML = list
+    .map((transaction) => {
+      const propertyTitle =
+        transaction.property_title ||
+        transaction.title ||
+        "Property";
 
-searchInput.addEventListener("input", applyFilters);
+      const party =
+        transaction.buyer_name ||
+        transaction.seller_name ||
+        transaction.buyer ||
+        "User";
 
+      return `
+        <tr>
+          <td>${escapeHTML(transaction.transaction_id)}</td>
+
+          <td>
+            <a href="listing-details.html?id=${escapeHTML(transaction.property_id)}" class="table-link">
+              ${escapeHTML(propertyTitle)}
+            </a>
+          </td>
+
+          <td>${escapeHTML(party)}</td>
+
+          <td>
+            ${
+              window.Utils?.formatCurrency?.(transaction.amount) ||
+              formatCurrency(transaction.amount)
+            }
+          </td>
+
+          <td>
+            ${
+              window.Utils?.formatDate?.(transaction.transaction_date) ||
+              formatDate(transaction.transaction_date)
+            }
+          </td>
+
+          <td>
+            <span class="badge ${getStatusClass(transaction.payment_status)}">
+              ${escapeHTML(transaction.payment_status || "pending")}
+            </span>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
 }
-
-if(statusFilter){
-
-statusFilter.addEventListener("change", applyFilters);
-
-}
-
-}
-
-
-function applyFilters(){
-
-const search = document
-.getElementById("searchTransaction")
-?.value.toLowerCase();
-
-const status = document
-.getElementById("statusFilter")
-?.value;
-
-let filtered = [...allTransactions];
-
-if(search){
-
-filtered = filtered.filter(t =>
-
-(t.title || "").toLowerCase().includes(search) ||
-(t.user_name || "").toLowerCase().includes(search) ||
-(t.buyer || "").toLowerCase().includes(search)
-
-);
-
-}
-
-if(status){
-
-filtered = filtered.filter(t => t.payment_status === status);
-
-}
-
-renderTransactions(filtered);
-
-}
-
-
 
 /* =============================
-STATUS BADGE
+   FILTER SYSTEM
 ============================= */
 
-function getStatusClass(status){
+function initFilters() {
+  const searchInput = document.getElementById("searchTransaction");
+  const statusFilter = document.getElementById("statusFilter");
 
-if(!status) return "";
+  if (searchInput) {
+    searchInput.addEventListener(
+      "input",
+      window.Utils?.debounce?.(applyFilters, 250) || applyFilters
+    );
+  }
 
-status = status.toLowerCase();
-
-if(status === "completed") return "badge--sale";
-
-if(status === "pending") return "badge--rent";
-
-if(status === "failed") return "badge--featured";
-
-if(status === "cancelled") return "badge--error";
-
-return "";
-
+  if (statusFilter) {
+    statusFilter.addEventListener("change", applyFilters);
+  }
 }
 
+function applyFilters() {
+  const search = document
+    .getElementById("searchTransaction")
+    ?.value
+    ?.toLowerCase()
+    ?.trim();
 
+  const status = document
+    .getElementById("statusFilter")
+    ?.value
+    ?.toLowerCase();
+
+  let filtered = [...allTransactions];
+
+  if (search) {
+    filtered = filtered.filter((transaction) => {
+      const propertyTitle = String(
+        transaction.property_title || transaction.title || ""
+      ).toLowerCase();
+
+      const buyerName = String(transaction.buyer_name || "").toLowerCase();
+      const sellerName = String(transaction.seller_name || "").toLowerCase();
+
+      return (
+        propertyTitle.includes(search) ||
+        buyerName.includes(search) ||
+        sellerName.includes(search)
+      );
+    });
+  }
+
+  if (status) {
+    filtered = filtered.filter(
+      (transaction) =>
+        String(transaction.payment_status || "").toLowerCase() === status
+    );
+  }
+
+  renderTransactions(filtered);
+}
 
 /* =============================
-FORMAT DATE
+   STATUS BADGE
 ============================= */
 
-function formatDate(date){
+function getStatusClass(status) {
+  const value = String(status || "").toLowerCase();
 
-if(!date) return "-";
+  if (value === "completed") return "badge--sale";
+  if (value === "pending") return "badge--rent";
+  if (value === "failed") return "badge--featured";
+  if (value === "cancelled") return "badge--error";
 
-return new Date(date).toLocaleDateString();
-
+  return "";
 }
-
-
 
 /* =============================
-FORMAT CURRENCY
+   FORMAT DATE
 ============================= */
 
-function formatCurrency(amount){
-
-if(!amount) return "₹0";
-
-return "₹" + Number(amount).toLocaleString();
-
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d)) return "-";
+  return d.toLocaleDateString("en-IN");
 }
-
-
 
 /* =============================
-XSS PROTECTION
+   FORMAT CURRENCY
 ============================= */
 
-function escapeHTML(str){
-
-return str?.replace(/[&<>"']/g,function(m){
-
-return({
-
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-
-})[m];
-
-});
-
+function formatCurrency(amount) {
+  const value = Number(amount);
+  if (isNaN(value)) return "₹0";
+  return "₹" + value.toLocaleString("en-IN");
 }
+
+/* =============================
+   XSS PROTECTION
+============================= */
+
+function escapeHTML(value) {
+  const str = String(value ?? "");
+
+  return str.replace(/[&<>"']/g, (m) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
+}
+
+/* expose globally */
+
+window.loadTransactions = loadTransactions;
+window.renderTransactions = renderTransactions;

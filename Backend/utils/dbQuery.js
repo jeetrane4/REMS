@@ -1,27 +1,54 @@
-const db = require("../config/db");
+const { query: dbQuery, pool } = require("../config/db");
 
 /*
- Centralized database query helper
- Ensures consistent query handling
+  Centralized database query helper
+  Handles queries + transactions + errors
 */
 
-async function query(text, params = []) {
+/* ==============================
+   BASIC QUERY
+============================== */
 
+const query = async (text, params = []) => {
   try {
-
-    const res = await db.query(text, params);
-    return res.rows;
-
+    const result = await dbQuery(text, params);
+    return result.rows;
   } catch (error) {
-
-    console.error("Database Query Error:");
+    console.error("DB QUERY ERROR");
     console.error("Query:", text);
     console.error("Params:", params);
-    console.error("Error:", error);
-
+    console.error("Error:", error.message);
     throw error;
   }
+};
 
-}
+/* ==============================
+   TRANSACTION SUPPORT
+============================== */
 
-module.exports = query;
+const transaction = async (callback) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const result = await callback(client);
+
+    await client.query("COMMIT");
+    return result;
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    console.error("DB TRANSACTION ERROR:", error.message);
+    throw error;
+
+  } finally {
+    client.release();
+  }
+};
+
+module.exports = {
+  query,
+  transaction
+};

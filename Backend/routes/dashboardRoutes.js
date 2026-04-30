@@ -1,14 +1,41 @@
 const express = require("express");
+
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
+const authorize = require("../middleware/roleMiddleware");
 
 const dashboardController = require("../controllers/dashboardController");
 
-router.get("/", protect, dashboardController.getDashboardStats);
+/* =========================
+   USER DASHBOARD
+========================= */
 
-router.get("/stats", dashboardController.getHomepageStats);
+router.get(
+  "/",
+  protect,
+  authorize(["buyer", "seller", "agent", "admin"]),
+  dashboardController.getDashboardStats
+);
 
-router.get("/activity", protect, dashboardController.getRecentActivity);
+/* =========================
+   HOMEPAGE STATS (PUBLIC)
+========================= */
+
+router.get(
+  "/stats",
+  dashboardController.getHomepageStats
+);
+
+/* =========================
+   RECENT ACTIVITY
+========================= */
+
+router.get(
+  "/activity",
+  protect,
+  authorize(["buyer", "seller", "agent", "admin"]),
+  dashboardController.getRecentActivity
+);
 
 module.exports = router;

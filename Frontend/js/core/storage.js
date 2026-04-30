@@ -1,60 +1,115 @@
 // =============================
-// STORAGE MANAGER – SAFE VERSION
+// STORAGE MANAGER – PRO VERSION
 // =============================
+
+const STORAGE_PREFIX = "rems_";
 
 const Storage = {
 
-  /* TOKEN */
+  /* =========================
+     INTERNAL HELPERS
+  ========================= */
 
-  setToken(token){
-    if(!token) return;
-    localStorage.setItem("token", token);
+  _set(key, value) {
+    try {
+      localStorage.setItem(STORAGE_PREFIX + key, value);
+    } catch (e) {
+      console.error("Storage set error:", e);
+    }
   },
 
-  getToken(){
-    try{
-      return localStorage.getItem("token");
-    }catch(e){
-      console.error("Token read error:", e);
+  _get(key) {
+    try {
+      return localStorage.getItem(STORAGE_PREFIX + key);
+    } catch (e) {
+      console.error("Storage get error:", e);
       return null;
     }
   },
 
-  removeToken(){
-    localStorage.removeItem("token");
+  _remove(key) {
+    try {
+      localStorage.removeItem(STORAGE_PREFIX + key);
+    } catch (e) {
+      console.error("Storage remove error:", e);
+    }
   },
 
-  /* USER */
+  /* =========================
+     TOKEN
+  ========================= */
 
-  setUser(user){
-    if(!user) return;
-    localStorage.setItem("user", JSON.stringify(user));
+  setToken(token) {
+    if (!token) return;
+    this._set("token", token);
   },
 
-  getUser(){
-    try{
-      const user = localStorage.getItem("user");
+  getToken() {
+    return this._get("token");
+  },
+
+  removeToken() {
+    this._remove("token");
+  },
+
+  /* =========================
+     USER
+  ========================= */
+
+  setUser(user) {
+    if (!user) return;
+    this._set("user", JSON.stringify(user));
+  },
+
+  getUser() {
+    try {
+      const user = this._get("user");
       return user ? JSON.parse(user) : null;
-    }catch(e){
+    } catch (e) {
       console.error("User parse error:", e);
+      this._remove("user");
       return null;
     }
   },
 
-  getUserRole(){
-    const user = this.getUser();
-    return user ? user.role : null;
+  getUserRole() {
+    return this.getUser()?.role || null;
   },
 
-  isLoggedIn(){
+  /* =========================
+     AUTH STATE
+  ========================= */
+
+  isLoggedIn() {
     return !!this.getToken();
   },
 
-  /* CLEAR */
+  logout() {
+    this.clear();
+    window.location.href = "login.html";
+  },
 
-  clear(){
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  /* =========================
+     CLEAR ALL
+  ========================= */
+
+  clear() {
+    this._remove("token");
+    this._remove("user");
   }
 
 };
+
+/* =========================
+   SYNC LOGOUT ACROSS TABS
+========================= */
+
+window.addEventListener("storage", (event) => {
+  if (event.key === STORAGE_PREFIX + "token" && !event.newValue) {
+    window.location.href = "login.html";
+  }
+});
+
+/* expose globally */
+
+window.Storage = Storage;

@@ -2,120 +2,174 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Properties – REMS</title>
 
-<title>Saved Properties – REMS</title>
+  <meta
+    name="description"
+    content="View properties you have saved for later on REMS."
+  >
 
-<meta name="description"
-content="View properties you have saved for later on REMS">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/animations.css">
-<link rel="stylesheet" href="css/responsive.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
 
-<header id="header"></header>
+  <header id="header"></header>
 
-<main class="section">
+  <main class="section">
+    <div class="container">
 
-<div class="container">
+      <div class="section__header">
+        <h1>Saved Properties</h1>
 
-<div class="section__header">
+        <p class="muted-text">
+          Properties you bookmarked for later
+        </p>
+      </div>
 
-<h1>Saved Properties</h1>
+      <!-- SAVED PROPERTY GRID -->
+      <div
+        id="savedProperties"
+        class="property-grid"
+        aria-live="polite">
 
-<p class="muted-text">
+        <div class="loading-state">
+          Loading saved properties...
+        </div>
 
-Properties you bookmarked for later
+      </div>
 
-</p>
+      <!-- EMPTY STATE -->
+      <div
+        id="savedEmpty"
+        class="empty-state hidden">
 
-</div>
+        <h3>No saved properties</h3>
 
+        <p>
+          Start browsing and save properties you like.
+        </p>
 
-<!-- SAVED PROPERTY GRID -->
+        <a
+          href="listings.html"
+          class="btn btn--primary">
+          Browse Properties
+        </a>
 
-<div
-id="savedProperties"
-class="property-grid">
+      </div>
 
-<div class="loading-state">
+    </div>
+  </main>
 
-Loading saved properties...
+  <footer id="footer"></footer>
 
-</div>
+  <button
+    id="topBtn"
+    class="btn btn-circle hidden"
+    aria-label="Back to top">
+    ↑
+  </button>
 
-</div>
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
 
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
 
-<!-- EMPTY STATE -->
+  <!-- Modules -->
+  <script src="js/modules/properties.js" defer></script>
 
-<div
-id="savedEmpty"
-class="empty-state hidden">
+  <!-- Fix Saved Properties Rendering -->
+  <script defer>
+    document.addEventListener("DOMContentLoaded", async () => {
 
-<h3>No saved properties</h3>
+      const container = document.getElementById("savedProperties");
+      const empty = document.getElementById("savedEmpty");
 
-<p>
+      if (!container) return;
 
-Start browsing and save properties you like.
+      try {
+        const res = await window.apiRequest("/saved-properties");
 
-</p>
+        const list = res?.data || res || [];
 
-<a
-href="listings.html"
-class="btn btn--primary">
+        if (!list || list.length === 0) {
+          container.innerHTML = "";
+          empty?.classList.remove("hidden");
+          return;
+        }
 
-Browse Properties
+        empty?.classList.add("hidden");
 
-</a>
+        container.innerHTML = list.map(p => `
+          <div class="property-card">
 
-</div>
+            <div class="property-card__content">
+              <h3>${p.title}</h3>
 
-</div>
+              <p class="muted-text">${p.city}</p>
 
-</main>
+              <p class="property-card__price">
+                ₹${Number(p.price).toLocaleString()}
+              </p>
 
-<footer id="footer"></footer>
+              <a href="listing-details.html?id=${p.property_id}"
+                 class="btn btn--primary btn--small">
+                 View Details
+              </a>
 
-<button
-id="topBtn"
-class="btn btn--circle hidden">
+            </div>
 
-↑
+          </div>
+        `).join("");
 
-</button>
+      } catch (err) {
+        console.error(err);
 
+        container.innerHTML = `
+          <div class="empty-state">
+            Failed to load saved properties
+          </div>
+        `;
+      }
 
-<!-- CORE -->
+    });
+  </script>
 
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
-
-<!-- UI -->
-
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/notifications.js"></script>
-
-<!-- MODULE -->
-
-<script src="js/modules/properties.js"></script>
-
-<!-- MAIN -->
-
-<script src="js/main.js"></script>
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
 
 </body>
 </html>

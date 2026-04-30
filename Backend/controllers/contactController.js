@@ -1,25 +1,26 @@
-const query = require("../utils/dbQuery");
+const { query } = require("../utils/dbQuery");
 
-exports.sendMessage = async (req,res,next)=>{
+/* =============================
+   SEND CONTACT MESSAGE
+============================= */
 
-try{
+exports.sendMessage = async (req, res, next) => {
+  try {
+    const { name, email, message } = req.body;
 
-const { name,email,message } = req.body;
+    const rows = await query(
+      `INSERT INTO contact_messages (name, email, message)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, email, message, created_at`,
+      [name, email, message]
+    );
 
-await query(
-`INSERT INTO contact_messages(name,email,message)
-VALUES($1,$2,$3)`,
-[name,email,message]
-);
-
-res.json({
-success:true,
-message:"Message received"
-});
-
-}
-catch(err){
-next(err);
-}
-
+    return res.status(201).json({
+      success: true,
+      message: "Message received successfully",
+      data: rows[0]
+    });
+  } catch (err) {
+    next(err);
+  }
 };

@@ -1,87 +1,100 @@
 // =============================
-// THEME CONTROLLER – PRODUCTION READY
+// THEME CONTROLLER
 // =============================
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", initTheme);
 
-initTheme();
-
-});
+const THEME_KEY = "rems_theme";
 
 /* =============================
-INITIALIZE THEME
+   INITIALIZE THEME
 ============================= */
 
-function initTheme(){
+function initTheme() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || localStorage.getItem("theme");
 
-const savedTheme = localStorage.getItem("theme");
+  const systemPrefersDark =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = savedTheme || (systemPrefersDark ? "dark" : "light");
 
-const theme = savedTheme || (systemPrefersDark ? "dark" : "light");
-
-applyTheme(theme);
-
-initializeToggle();
-
+  applyTheme(theme);
+  initializeToggle();
+  watchSystemTheme();
 }
 
 /* =============================
-THEME TOGGLE INITIALIZER
+   THEME TOGGLE INITIALIZER
 ============================= */
 
-function initializeToggle(){
+function initializeToggle() {
+  const bindToggle = () => {
+    const toggle = document.getElementById("themeToggle");
 
-// Navbar may load dynamically, so wait a bit
-setTimeout(() => {
+    if (!toggle || toggle.dataset.bound === "true") return;
 
-const toggle = document.getElementById("themeToggle");
-const icon = document.getElementById("themeIcon");
+    toggle.dataset.bound = "true";
 
-if(!toggle) return;
+    toggle.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const newTheme = current === "dark" ? "light" : "dark";
 
-toggle.addEventListener("click", () => {
+      applyTheme(newTheme);
+      localStorage.setItem(THEME_KEY, newTheme);
+      localStorage.setItem("theme", newTheme);
+    });
+  };
 
-const current = document.documentElement.getAttribute("data-theme");
+  bindToggle();
 
-const newTheme = current === "dark" ? "light" : "dark";
-
-applyTheme(newTheme);
-
-localStorage.setItem("theme", newTheme);
-
-});
-
-},200);
-
+  setTimeout(bindToggle, 300);
+  setTimeout(bindToggle, 800);
 }
 
 /* =============================
-APPLY THEME
+   APPLY THEME
 ============================= */
 
-function applyTheme(theme){
+function applyTheme(theme) {
+  const cleanTheme = theme === "dark" ? "dark" : "light";
 
-const toggle = document.getElementById("themeToggle");
-const icon = document.getElementById("themeIcon");
+  document.documentElement.setAttribute("data-theme", cleanTheme);
 
-document.documentElement.setAttribute("data-theme", theme);
+  const toggle = document.getElementById("themeToggle");
+  const icon = document.getElementById("themeIcon");
 
-if(icon){
+  if (icon) {
+    icon.textContent = cleanTheme === "dark" ? "☀️" : "🌙";
+  }
 
-icon.textContent = theme === "dark" ? "☀️" : "🌙";
-
+  if (toggle) {
+    toggle.setAttribute(
+      "aria-label",
+      cleanTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+    );
+  }
 }
 
-if(toggle){
+/* =============================
+   SYSTEM THEME WATCHER
+============================= */
 
-toggle.setAttribute(
-"aria-label",
-theme === "dark"
-? "Switch to light mode"
-: "Switch to dark mode"
-);
+function watchSystemTheme() {
+  if (!window.matchMedia) return;
 
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+  media.addEventListener?.("change", (event) => {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+
+    if (savedTheme) return;
+
+    applyTheme(event.matches ? "dark" : "light");
+  });
 }
 
-}
+/* expose globally */
+
+window.initTheme = initTheme;
+window.applyTheme = applyTheme;

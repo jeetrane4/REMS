@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications – REMS</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+<header id="header"></header>
+
+<main class="section">
+  <div class="container">
+    <div class="section__header">
+      <h1>Notifications</h1>
+      <p class="muted-text">View your latest REMS alerts and updates.</p>
+    </div>
+
+    <div id="notificationList" class="card activity-list">
+      <div class="loading-state">Loading notifications...</div>
+    </div>
+  </div>
+</main>
+
+<footer id="footer"></footer>
+<button id="topBtn" class="btn btn-circle hidden">↑</button>
+
+<script src="js/core/storage.js" defer></script>
+<script src="js/core/utils.js" defer></script>
+<script src="js/core/api.js" defer></script>
+
+<script src="js/ui/loader.js" defer></script>
+<script src="js/ui/notifications.js" defer></script>
+<script src="js/ui/navbar.js" defer></script>
+<script src="js/ui/theme.js" defer></script>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", loadNotifications);
+
+async function loadNotifications() {
+  const container = document.getElementById("notificationList");
+
+  try {
+    const res = await window.API.get("/notifications");
+    const list = res?.data || [];
+
+    if (!list.length) {
+      container.innerHTML = `<div class="empty-state">No notifications yet.</div>`;
+      return;
+    }
+
+    container.innerHTML = list.map((n) => `
+      <div class="activity-item ${n.is_read ? "" : "surface-2"}">
+        <strong>${escapeHTML(n.message)}</strong>
+        <p class="muted-text">${formatDate(n.created_at)}</p>
+        ${
+          !n.is_read
+            ? `<button class="btn btn--small btn--outline" onclick="markNotificationRead(${n.notification_id})">Mark as read</button>`
+            : `<span class="badge badge--sale">Read</span>`
+        }
+      </div>
+    `).join("");
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div class="empty-state">Failed to load notifications.</div>`;
+  }
+}
+
+async function markNotificationRead(id) {
+  try {
+    await window.API.put(`/notifications/${id}`, {});
+    window.notify?.("Notification marked as read", "success");
+    await loadNotifications();
+  } catch (err) {
+    console.error(err);
+    window.notify?.("Failed to update notification", "error");
+  }
+}
+
+function formatDate(value) {
+  return window.Utils?.formatDate?.(value) || new Date(value).toLocaleDateString("en-IN");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[m]);
+}
+</script>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

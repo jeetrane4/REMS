@@ -2,232 +2,452 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Properties – REMS</title>
 
-<title>Manage Properties – REMS</title>
+  <meta
+    name="description"
+    content="Manage your listed properties and track their approval, availability, and listing status."
+  >
 
-<meta name="description"
-content="Manage your listed properties and track their status">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/responsive.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
 
-<header id="header"></header>
+  <header id="header"></header>
+
+  <main class="section dashboard-page">
+    <div class="container">
+
+      <!-- PAGE HEADER -->
+      <div class="dashboard-header">
+        <div>
+          <h1>Manage Properties</h1>
+
+          <p class="muted-text">
+            View and manage your property listings
+          </p>
+        </div>
+
+        <div class="dashboard-actions">
+          <a href="add-property.html" class="btn btn--primary">
+            + Add Property
+          </a>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="card filter-bar">
+
+        <div class="filter-group">
+          <label for="searchProperty">Search</label>
+
+          <input
+            type="text"
+            id="searchProperty"
+            placeholder="Search property"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="statusFilter">Status</label>
+
+          <select id="statusFilter" aria-label="Filter by property status">
+            <option value="">All</option>
+            <option value="available">Available</option>
+            <option value="sold">Sold</option>
+            <option value="rented">Rented</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="verificationFilter">Verification</label>
+
+          <select id="verificationFilter" aria-label="Filter by verification status">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button
+            id="resetPropertyFilter"
+            type="button"
+            class="btn btn--outline">
+            Reset
+          </button>
+        </div>
+
+      </div>
+
+      <!-- SUMMARY -->
+      <section class="section section-light">
+        <div class="dashboard-grid">
+
+          <div class="card summary-card">
+            <h3 id="totalProperties">0</h3>
+            <p>Total Properties</p>
+          </div>
+
+          <div class="card summary-card">
+            <h3 id="activeProperties">0</h3>
+            <p>Available</p>
+          </div>
+
+          <div class="card summary-card">
+            <h3 id="soldProperties">0</h3>
+            <p>Sold / Rented</p>
+          </div>
+
+          <div class="card summary-card">
+            <h3 id="pendingProperties">0</h3>
+            <p>Pending Approval</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PROPERTY LIST -->
+      <section class="section">
+
+        <div
+          id="dashboardPropertyList"
+          class="property-grid"
+          aria-live="polite">
 
-<main class="section dashboard-page">
+          <div class="loading-state">
+            Loading properties...
+          </div>
 
-<div class="container">
+        </div>
 
-<!-- PAGE HEADER -->
+        <div
+          id="propertyEmpty"
+          class="empty-state hidden">
 
-<div class="dashboard-header">
+          <h3>No properties found</h3>
 
-<div>
+          <p>You haven't added any properties yet.</p>
 
-<h1>Manage Properties</h1>
+          <a href="add-property.html" class="btn btn--primary">
+            Add Property
+          </a>
 
-<p class="muted-text">
+        </div>
 
-View and manage your property listings
+        <div id="propertyPagination" class="pagination"></div>
 
-</p>
+      </section>
 
-</div>
+    </div>
+  </main>
 
-<div class="dashboard-actions">
+  <footer id="footer"></footer>
 
-<a
-href="add-property.html"
-class="btn btn--primary">
+  <button
+    id="topBtn"
+    class="btn btn-circle hidden"
+    aria-label="Back to top">
+    ↑
+  </button>
 
-+ Add Property
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
 
-</a>
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
 
-</div>
+  <!-- Page Logic -->
+  <script defer>
+    let dashboardProperties = [];
 
-</div>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = window.Storage?.getUser?.();
 
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
 
-<!-- FILTER BAR -->
+      if (!["seller", "agent", "admin"].includes(user.role)) {
+        window.location.href = "dashboard.html";
+        return;
+      }
 
-<div class="card filter-bar">
+      bindPropertyFilters();
+      await loadDashboardProperties();
+    });
 
-<div class="filter-group">
+    async function loadDashboardProperties() {
+      const container = document.getElementById("dashboardPropertyList");
+      const empty = document.getElementById("propertyEmpty");
 
-<label>Search</label>
+      if (!container) return;
 
-<input
-type="text"
-id="searchProperty"
-placeholder="Search property">
+      try {
+        window.showLoader?.();
 
-</div>
+        container.innerHTML = `
+          <div class="loading-state">
+            Loading properties...
+          </div>
+        `;
+
+        const user = window.Storage?.getUser?.();
+
+        let res;
+
+        if (user?.role === "admin") {
+          res = await window.API.get("/admin/properties");
+        } else {
+          res = await window.API.get("/properties/mine");
+        }
+
+        dashboardProperties = Array.isArray(res?.data) ? res.data : [];
+
+        updatePropertySummary(dashboardProperties);
+
+        if (!dashboardProperties.length) {
+          container.innerHTML = "";
+          empty?.classList.remove("hidden");
+          return;
+        }
 
-<div class="filter-group">
+        empty?.classList.add("hidden");
+        renderDashboardProperties(dashboardProperties);
+      } catch (err) {
+        console.error(err);
 
-<label>Status</label>
-
-<select id="statusFilter" aria-label="Filter by property status">
-
-<option value="">All</option>
-<option value="Available">Available</option>
-<option value="Sold">Sold</option>
-<option value="Rented">Rented</option>
-
-</select>
-
-</div>
-
-<div class="filter-actions">
-
-<button
-id="applyPropertyFilter"
-class="btn btn--outline">
-
-Apply
-
-</button>
-
-<button
-id="resetPropertyFilter"
-class="btn btn--outline">
-
-Reset
-
-</button>
-
-</div>
-
-</div>
-
-
-<!-- SUMMARY -->
-
-<section class="section section-light">
-
-<div class="dashboard-grid">
-
-<div class="card summary-card">
-
-<h3 id="totalProperties">0</h3>
-
-<p>Total Properties</p>
-
-</div>
-
-<div class="card summary-card">
-
-<h3 id="activeProperties">0</h3>
-
-<p>Available</p>
-
-</div>
-
-<div class="card summary-card">
-
-<h3 id="soldProperties">0</h3>
-
-<p>Sold / Rented</p>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- PROPERTY LIST -->
-
-<section class="section">
-
-<div
-id="propertyList"
-class="property-grid">
-
-<div class="loading-state">
-
-Loading properties...
-
-</div>
-
-</div>
-
-<div
-id="propertyEmpty"
-class="empty-state hidden">
-
-<h3>No properties found</h3>
-
-<p>You haven't added any properties yet.</p>
-
-<a
-href="add-property.html"
-class="btn btn--primary">
-
-Add Property
-
-</a>
-
-</div>
-
-
-<!-- PAGINATION -->
-
-<div
-id="propertyPagination"
-class="pagination">
-
-</div>
-
-</section>
-
-</div>
-
-</main>
-
-<footer id="footer"></footer>
-
-<button
-id="topBtn"
-class="btn btn-circle hidden">
-
-↑
-
-</button>
-
-<!-- CORE -->
-
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
-
-<!-- UI -->
-
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/notifications.js"></script>
-
-<!-- MODULES -->
-
-<script src="js/modules/properties.js"></script>
-<script src="js/modules/dashboard.js"></script>
-
-<!-- MAIN -->
-
-<script src="js/main.js"></script>
+        container.innerHTML = `
+          <div class="empty-state">
+            Failed to load properties.
+          </div>
+        `;
+
+        window.notify?.(err.message || "Failed to load properties", "error");
+      } finally {
+        window.hideLoader?.();
+      }
+    }
+
+    function renderDashboardProperties(list) {
+      const container = document.getElementById("dashboardPropertyList");
+      const empty = document.getElementById("propertyEmpty");
+
+      if (!container) return;
+
+      if (!list.length) {
+        container.innerHTML = "";
+        empty?.classList.remove("hidden");
+        return;
+      }
+
+      empty?.classList.add("hidden");
+
+      container.innerHTML = list.map((property) => {
+        const image = resolveImage(property.image);
+        const price = window.Utils?.formatCurrency?.(property.price) ||
+          `₹${Number(property.price || 0).toLocaleString("en-IN")}`;
+
+        return `
+          <div class="property-card">
+
+            <div class="property-card__image">
+              <img
+                src="${escapeHTML(image)}"
+                alt="${escapeHTML(property.title || "Property")}"
+                loading="lazy"
+                onerror="this.src='images/img1.webp'"
+              >
+
+              <span class="property-badge">
+                ${escapeHTML(property.verification_status || "pending")}
+              </span>
+            </div>
+
+            <div class="property-card__content">
+              <h3>${escapeHTML(property.title || "Untitled Property")}</h3>
+
+              <p class="property-card__location">
+                ${escapeHTML(property.city || "-")}
+              </p>
+
+              <p class="property-card__price">
+                ${price}
+              </p>
+
+              <p class="muted-text small">
+                Status: ${escapeHTML(property.status || "-")} |
+                Type: ${escapeHTML(property.listing_type || "-")}
+              </p>
+
+              <div class="property-card__actions">
+                <a
+                  href="listing-details.html?id=${property.property_id}"
+                  class="btn btn--primary btn--small">
+                  View
+                </a>
+
+                <button
+                  type="button"
+                  class="btn btn--outline btn--small"
+                  onclick="deleteDashboardProperty(${Number(property.property_id)})">
+                  Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function deleteDashboardProperty(propertyId) {
+      if (!confirm("Are you sure you want to delete this property?")) return;
+
+      try {
+        window.showLoader?.();
+
+        await window.API.delete(`/properties/${propertyId}`);
+
+        window.notify?.("Property deleted successfully", "success");
+
+        dashboardProperties = dashboardProperties.filter(
+          (p) => Number(p.property_id) !== Number(propertyId)
+        );
+
+        updatePropertySummary(dashboardProperties);
+        renderDashboardProperties(dashboardProperties);
+      } catch (err) {
+        console.error(err);
+        window.notify?.(err.message || "Failed to delete property", "error");
+      } finally {
+        window.hideLoader?.();
+      }
+    }
+
+    function updatePropertySummary(list) {
+      const total = list.length;
+      const active = list.filter((p) => p.status === "available").length;
+      const soldOrRented = list.filter((p) => ["sold", "rented"].includes(p.status)).length;
+      const pending = list.filter((p) => p.verification_status === "pending").length;
+
+      document.getElementById("totalProperties").textContent = total;
+      document.getElementById("activeProperties").textContent = active;
+      document.getElementById("soldProperties").textContent = soldOrRented;
+      document.getElementById("pendingProperties").textContent = pending;
+    }
+
+    function bindPropertyFilters() {
+      const searchInput = document.getElementById("searchProperty");
+      const statusFilter = document.getElementById("statusFilter");
+      const verificationFilter = document.getElementById("verificationFilter");
+      const resetBtn = document.getElementById("resetPropertyFilter");
+
+      const applyFilters = () => {
+        const search = searchInput?.value?.toLowerCase()?.trim() || "";
+        const status = statusFilter?.value || "";
+        const verification = verificationFilter?.value || "";
+
+        let filtered = [...dashboardProperties];
+
+        if (search) {
+          filtered = filtered.filter((p) =>
+            String(p.title || "").toLowerCase().includes(search) ||
+            String(p.city || "").toLowerCase().includes(search)
+          );
+        }
+
+        if (status) {
+          filtered = filtered.filter((p) => p.status === status);
+        }
+
+        if (verification) {
+          filtered = filtered.filter((p) => p.verification_status === verification);
+        }
+
+        renderDashboardProperties(filtered);
+      };
+
+      searchInput?.addEventListener("input", window.Utils?.debounce?.(applyFilters, 250) || applyFilters);
+      statusFilter?.addEventListener("change", applyFilters);
+      verificationFilter?.addEventListener("change", applyFilters);
+
+      resetBtn?.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        if (statusFilter) statusFilter.value = "";
+        if (verificationFilter) verificationFilter.value = "";
+        renderDashboardProperties(dashboardProperties);
+      });
+    }
+
+    function resolveImage(image) {
+      if (!image) return "images/img1.webp";
+
+      if (image.startsWith("http")) return image;
+
+      if (image.startsWith("/uploads")) {
+        const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+        return `${base}${image}`;
+      }
+
+      return image;
+    }
+
+    function escapeHTML(value) {
+      const str = String(value ?? "");
+
+      return str.replace(/[&<>"']/g, (m) => {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        }[m];
+      });
+    }
+
+    window.deleteDashboardProperty = deleteDashboardProperty;
+  </script>
+
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
 
 </body>
 </html>

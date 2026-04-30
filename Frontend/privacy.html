@@ -9,18 +9,31 @@
 <title>Privacy Policy | REMS</title>
 
 <meta name="description"
-content="Privacy policy explaining how REMS collects, uses and protects user data.">
+content="Privacy Policy explaining how REMS collects, uses, and protects your personal data.">
 
 <meta name="robots" content="index, follow">
 
-<link rel="stylesheet" href="css/base.css">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- CSS -->
 <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/navigation.css">
 <link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/animations.css">
-<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/forms.css">
 <link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/utilities.css">
+<link rel="stylesheet" href="css/responsive.css">
 
 </head>
 
@@ -36,8 +49,8 @@ content="Privacy policy explaining how REMS collects, uses and protects user dat
 
 <p class="muted-text">
 
-REMS (Real Estate Management System) respects the privacy of its users.
-This policy explains how we collect, use and protect your information.
+REMS (Real Estate Management System) respects your privacy.  
+This policy explains how we collect, use, and protect your information.
 
 </p>
 
@@ -50,13 +63,13 @@ This policy explains how we collect, use and protect your information.
 
 <ul>
 
-<li>Name and email during account registration</li>
+<li>Name, email, and mobile number during registration</li>
 
-<li>Property listing information submitted by sellers</li>
+<li>Property listing data submitted by sellers/agents</li>
 
-<li>Booking requests made by buyers</li>
+<li>Booking and transaction-related information</li>
 
-<li>Basic usage analytics for system improvement</li>
+<li>Basic usage analytics for improving system performance</li>
 
 </ul>
 
@@ -71,19 +84,19 @@ This policy explains how we collect, use and protect your information.
 
 <p>
 
-The collected information is used to provide platform services including:
+Your data is used to provide and improve REMS services:
 
 </p>
 
 <ul>
 
-<li>Property listing and discovery</li>
+<li>Property listing, searching, and recommendations</li>
 
-<li>Managing property bookings</li>
+<li>Managing bookings and user interactions</li>
 
-<li>Tracking transactions</li>
+<li>Processing transactions (simulated/demo)</li>
 
-<li>Improving platform functionality</li>
+<li>Enhancing platform security and performance</li>
 
 </ul>
 
@@ -94,14 +107,20 @@ The collected information is used to provide platform services including:
 
 <section class="policy-section">
 
-<h2>Cookies</h2>
+<h2>Cookies & Storage</h2>
 
 <p>
 
-REMS may use cookies or browser storage to maintain session data
-such as authentication tokens and user preferences.
+REMS uses browser storage (localStorage) and cookies for:
 
 </p>
+
+<ul>
+
+<li>Authentication (JWT token storage)</li>
+<li>User preferences (theme, settings)</li>
+
+</ul>
 
 </section>
 
@@ -114,24 +133,24 @@ such as authentication tokens and user preferences.
 
 <p>
 
-We implement authentication and access controls to ensure that
-user data is securely handled within the platform.
+We implement authentication, authorization, and database-level protections  
+to ensure your data is handled securely.
 
 </p>
 
 </section>
 
 
-<!-- DEMO NOTE -->
+<!-- LIMITATIONS -->
 
 <section class="policy-section">
 
-<h2>Academic Project Notice</h2>
+<h2>Limitations</h2>
 
 <p class="muted-text">
 
-This platform is developed as an academic project.
-Some features such as payments are simulated and do not involve real financial transactions.
+This platform is developed as an academic project.  
+Some features like payments and notifications are simulated.
 
 </p>
 
@@ -142,20 +161,15 @@ Some features such as payments are simulated and do not involve real financial t
 
 <section class="policy-section">
 
-<h2>Contact</h2>
+<h2>Contact Us</h2>
 
 <p>
 
-If you have questions about this privacy policy,
-please contact the REMS support team.
+If you have questions about this policy, contact us:
 
 </p>
 
-<p>
-
-Email: support@rems.com
-
-</p>
+<p><strong>Email:</strong> support@rems.com</p>
 
 </section>
 
@@ -165,25 +179,25 @@ Email: support@rems.com
 
 <footer id="footer"></footer>
 
+<button id="topBtn" class="btn btn-circle hidden">↑</button>
 
 <!-- CORE -->
 
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/ui/notifications.js"></script>
-<script src="js/ui/loader.js"></script>
-<script src="js/core/api.js"></script>
+<script src="js/core/storage.js" defer></script>
+<script src="js/core/utils.js" defer></script>
+<script src="js/core/api.js" defer></script>
 
 <!-- UI -->
 
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/modals.js"></script>
+<script src="js/ui/loader.js" defer></script>
+<script src="js/ui/notifications.js" defer></script>
+<script src="js/ui/theme.js" defer></script>
+<script src="js/ui/navbar.js" defer></script>
+<script src="js/ui/modals.js" defer></script>
 
 <!-- MAIN -->
 
-<script src="js/main.js"></script>
+<script src="js/main.js" defer></script>
 
 </body>
-
 </html>

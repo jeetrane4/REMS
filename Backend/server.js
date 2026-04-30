@@ -1,23 +1,42 @@
-require("dotenv").config();
+require("dotenv").config({ path: "./Backend/.env" });
 
 const app = require("./app");
+const { testConnection, pool } = require("./config/db");
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+
+let server;
 
 /* ==============================
    START SERVER
 ============================== */
 
-const server = app.listen(PORT, () => {
-  console.log(`REMS Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await testConnection();
+
+    server = app.listen(PORT, () => {
+      console.log(`REMS Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start REMS server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 /* ==============================
    HANDLE UNCAUGHT EXCEPTIONS
 ============================== */
 
-process.on("uncaughtException",(err)=>{
-  console.error("Uncaught Exception:",err);
+process.on("uncaughtException", async (err) => {
+  console.error("Uncaught Exception:", err.message);
+
+  if (pool) {
+    await pool.end();
+  }
+
   process.exit(1);
 });
 
@@ -25,22 +44,47 @@ process.on("uncaughtException",(err)=>{
    HANDLE PROMISE REJECTIONS
 ============================== */
 
-process.on("unhandledRejection",(err)=>{
-  console.error("Unhandled Promise Rejection:",err);
+process.on("unhandledRejection", async (err) => {
+  console.error("Unhandled Promise Rejection:", err.message);
 
-  server.close(()=>{
+  if (server) {
+    server.close(async () => {
+      if (pool) {
+        await pool.end();
+      }
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });
 
 /* ==============================
    GRACEFUL SHUTDOWN
 ============================== */
 
-process.on("SIGTERM",()=>{
-  console.log("SIGTERM received. Closing server...");
+const gracefulShutdown = async (signal) => {
+  console.log(`${signal} received. Closing REMS server...`);
 
-  server.close(()=>{
-    console.log("Server closed.");
-  });
-});
+  if (server) {
+    server.close(async () => {
+      console.log("HTTP server closed.");
+
+      if (pool) {
+        await pool.end();
+        console.log("Database pool closed.");
+      }
+
+      process.exit(0);
+    });
+  } else {
+    if (pool) {
+      await pool.end();
+    }
+
+    process.exit(0);
+  }
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));

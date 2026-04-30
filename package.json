@@ -1,20 +1,26 @@
 {
-  "name": "rs",
+  "name": "rems",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Real Estate Management System using HTML, CSS, JavaScript, Node.js, Express, and PostgreSQL/Supabase",
+  "main": "Backend/server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node Backend/server.js",
     "dev": "nodemon Backend/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node Backend/testdb.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "real-estate",
+    "property-management",
+    "nodejs",
+    "express",
+    "postgresql",
+    "supabase"
+  ],
+  "author": "REMS Team",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.3",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -25,9 +31,14 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
-    "mysql2": "^3.18.2",
     "nodemailer": "^8.0.2",
     "pg": "^8.20.0",
     "xss-clean": "^0.1.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

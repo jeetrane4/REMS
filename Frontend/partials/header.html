@@ -19,11 +19,14 @@
     </button>
 
     <!-- Navigation -->
-    <nav id="mainNav" class="nav">
+    <nav id="mainNav" class="nav main-nav">
 
       <a href="index.html">Home</a>
-      <a href="listings.html?type=buy">Buy</a>
-      <a href="listings.html?type=rent">Rent</a>
+
+      <!-- FIXED: correct query param -->
+      <a href="listings.html?listing_type=sale">Buy</a>
+      <a href="listings.html?listing_type=rent">Rent</a>
+
       <a href="add-property.html">Sell</a>
 
     </nav>
@@ -31,6 +34,7 @@
     <!-- Header Actions -->
     <div class="header__actions">
 
+      <!-- Post Property -->
       <a 
         href="add-property.html" 
         class="btn btn--primary hidden" 
@@ -38,6 +42,7 @@
         Post Property
       </a>
 
+      <!-- Auth Buttons -->
       <a 
         href="login.html" 
         class="btn btn--outline"
@@ -57,7 +62,9 @@
 
         <button 
           class="profile-btn"
-          id="profileToggle">
+          id="profileToggle"
+          aria-haspopup="true"
+          aria-expanded="false">
 
           <span id="profileName">Account</span>
           ▼
@@ -67,11 +74,34 @@
         <div class="dropdown-menu" id="dropdownMenu">
 
           <a href="dashboard.html">Dashboard</a>
-          <a href="dashboard-properties.html" id="myListingsLink" class="hidden">My Listings</a>
-          <a href="bookings.html" id="myBookingsLink" class="hidden">My Bookings</a>
+
+          <!-- Seller/Agent -->
+          <a href="dashboard-properties.html" id="myListingsLink" class="hidden">
+            My Listings
+          </a>
+
+          <!-- Buyer -->
+          <a href="bookings.html" id="myBookingsLink" class="hidden">
+            My Bookings
+          </a>
+
+          <!-- NEW: Saved Properties -->
+          <a href="saved.html" id="savedPropertiesLink" class="hidden">
+            Saved Properties
+          </a>
+
           <a href="transactions.html">Transactions</a>
+
           <a href="settings.html">Settings</a>
-          <a href="users.html" id="adminLink" class="hidden">Admin Panel</a>
+
+          <!-- Admin -->
+          <a href="users.html" id="usersLink" class="hidden">
+            Manage Users
+          </a>
+
+          <a href="admin.html" id="adminLink" class="hidden">
+            Admin Panel
+          </a>
 
           <button id="logoutBtn" class="dropdown-logout">
             Logout

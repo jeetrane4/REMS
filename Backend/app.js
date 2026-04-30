@@ -1,5 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({ path: "./Backend/.env" });
 
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -27,6 +28,7 @@ const comparisonRoutes = require("./routes/comparisonRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const loanRoutes = require("./routes/loanRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 const errorHandler = require("./middleware/errorHandler");
 
@@ -36,13 +38,19 @@ const app = express();
    SECURITY
 ============================== */
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false
+  })
+);
 
-app.use(cors({
-  origin: "*",
-  methods: ["GET","POST","PUT","DELETE"],
-  allowedHeaders: ["Content-Type","Authorization"]
-}));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
 
 /* ==============================
    PERFORMANCE
@@ -57,7 +65,12 @@ app.use(compression());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
-  message: "Too many requests from this IP"
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests from this IP. Please try again later."
+  }
 });
 
 app.use("/api", limiter);
@@ -66,30 +79,37 @@ app.use("/api", limiter);
    LOGGING
 ============================== */
 
-app.use(morgan("dev"));
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+}
 
 /* ==============================
    BODY PARSER
 ============================== */
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 /* ==============================
    STATIC FILES
 ============================== */
 
-app.use("/uploads", express.static("uploads"));
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "Backend", "uploads"))
+);
 
 /* ==============================
    HEALTH CHECK
 ============================== */
 
-app.get("/health",(req,res)=>{
-  res.json({
-    status:"OK",
-    service:"REMS API",
-    time:new Date()
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "OK",
+    service: "REMS API",
+    version: "1.0.0",
+    time: new Date().toISOString()
   });
 });
 
@@ -97,10 +117,15 @@ app.get("/health",(req,res)=>{
    ROOT
 ============================== */
 
-app.get("/",(req,res)=>{
-  res.json({
-    message:"REMS API running",
-    version:"2.0"
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "REMS API running successfully",
+    version: "1.0.0",
+    endpoints: {
+      health: "/health",
+      api: "/api"
+    }
   });
 });
 
@@ -124,19 +149,21 @@ app.use("/api/property-documents", propertyDocumentRoutes);
 app.use("/api/user-documents", userDocumentRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/map", mapRoutes);
-app.use("/api/properties/compare", comparisonRoutes);
+app.use("/api/comparisons", comparisonRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/loans", loanRoutes);
+app.use("/api/contact", contactRoutes);
 
 /* ==============================
    404 HANDLER
 ============================== */
 
-app.use((req,res)=>{
+app.use((req, res) => {
   res.status(404).json({
-    success:false,
-    message:"Route not found"
+    success: false,
+    message: "Route not found",
+    path: req.originalUrl
   });
 });
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments – REMS</title>
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+<header id="header"></header>
+
+<main class="section">
+  <div class="container">
+    <div class="section__header">
+      <h1>Payments</h1>
+      <p class="muted-text">Simulated payment entry for academic/demo purpose.</p>
+    </div>
+
+    <form id="paymentForm" class="card form-grid">
+      <div class="form-group">
+        <label for="transaction_id">Transaction ID</label>
+        <input type="number" id="transaction_id" name="transaction_id" required>
+      </div>
+
+      <div class="form-group">
+        <label for="amount_paid">Amount Paid</label>
+        <input type="number" id="amount_paid" name="amount_paid" required>
+      </div>
+
+      <div class="form-group">
+        <label for="method">Payment Method</label>
+        <select id="method" name="method" required>
+          <option value="UPI">UPI</option>
+          <option value="Card">Card</option>
+          <option value="NetBanking">Net Banking</option>
+          <option value="Cash">Cash</option>
+        </select>
+      </div>
+
+      <button class="btn btn--primary" type="submit">Mark Payment Successful</button>
+    </form>
+  </div>
+</main>
+
+<footer id="footer"></footer>
+
+<script src="js/core/storage.js" defer></script>
+<script src="js/core/utils.js" defer></script>
+<script src="js/core/api.js" defer></script>
+<script src="js/ui/loader.js" defer></script>
+<script src="js/ui/notifications.js" defer></script>
+<script src="js/ui/navbar.js" defer></script>
+<script src="js/ui/theme.js" defer></script>
+
+<script defer>
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("paymentForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(e.target));
+
+    try {
+      await window.API.post("/payments", {
+        transaction_id: Number(data.transaction_id),
+        amount_paid: Number(data.amount_paid),
+        method: data.method
+      });
+
+      window.notify?.("Payment recorded successfully", "success");
+      e.target.reset();
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Payment failed", "error");
+    }
+  });
+});
+</script>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

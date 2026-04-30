@@ -2,193 +2,209 @@
 // NAVBAR CONTROLLER
 // =============================
 
-function initNavbar(){
-
-handleAuthVisibility();
-handleRoleLinks();
-handleLogout();
-handleProfileDropdown();
-handleMobileToggle();
-handleScrollEffect();
-setActiveNavLink();
-setProfileName();
-
+function initNavbar() {
+  handleAuthVisibility();
+  handleRoleLinks();
+  handleLogout();
+  handleProfileDropdown();
+  handleMobileToggle();
+  handleScrollEffect();
+  setActiveNavLink();
+  setProfileName();
 }
 
-/* PROFILE NAME */
+/* =============================
+   PROFILE NAME
+============================= */
 
-function setProfileName(){
+function setProfileName() {
+  const user = window.Storage?.getUser?.();
+  const profileName = document.getElementById("profileName");
 
-const user = Storage.getUser();
-const profileName = document.getElementById("profileName");
-
-if(user && profileName){
-profileName.textContent = user.name || user.email || "Account";
+  if (user && profileName) {
+    profileName.textContent =
+      user.name ||
+      user.user_name ||
+      user.email ||
+      user.user_email ||
+      "Account";
+  }
 }
 
+/* =============================
+   AUTH VISIBILITY
+============================= */
+
+function handleAuthVisibility() {
+  const token = window.Storage?.getToken?.();
+
+  const loginBtn = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
+  const profileMenu = document.getElementById("profileMenu");
+
+  if (token) {
+    loginBtn?.classList.add("hidden");
+    registerBtn?.classList.add("hidden");
+    profileMenu?.classList.remove("hidden");
+  } else {
+    loginBtn?.classList.remove("hidden");
+    registerBtn?.classList.remove("hidden");
+    profileMenu?.classList.add("hidden");
+  }
 }
 
-/* AUTH VISIBILITY */
+/* =============================
+   LOGOUT
+============================= */
 
-function handleAuthVisibility(){
+function handleLogout() {
+  const logoutBtn = document.getElementById("logoutBtn");
 
-const token = Storage.getToken();
+  if (!logoutBtn || logoutBtn.dataset.bound === "true") return;
 
-const loginBtn = document.getElementById("loginBtn");
-const registerBtn = document.getElementById("registerBtn");
-const profileMenu = document.getElementById("profileMenu");
+  logoutBtn.dataset.bound = "true";
 
-if(!loginBtn || !registerBtn || !profileMenu) return;
+  logoutBtn.addEventListener("click", () => {
+    window.Storage?.clear?.();
+    window.notify?.("Logged out successfully", "success");
 
-if(token){
-
-loginBtn.classList.add("hidden");
-registerBtn.classList.add("hidden");
-profileMenu.classList.remove("hidden");
-
-}else{
-
-loginBtn.classList.remove("hidden");
-registerBtn.classList.remove("hidden");
-profileMenu.classList.add("hidden");
-
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 500);
+  });
 }
 
+/* =============================
+   ROLE LINKS
+============================= */
+
+function handleRoleLinks() {
+  const user = window.Storage?.getUser?.();
+  const token = window.Storage?.getToken?.();
+
+  const myListingsLink = document.getElementById("myListingsLink");
+  const myBookingsLink = document.getElementById("myBookingsLink");
+  const savedLink = document.getElementById("savedPropertiesLink");
+  const adminLink = document.getElementById("adminLink");
+  const usersLink = document.getElementById("usersLink");
+  const postPropertyBtn = document.getElementById("postPropertyBtn");
+
+  [
+    myListingsLink,
+    myBookingsLink,
+    savedLink,
+    adminLink,
+    usersLink,
+    postPropertyBtn
+  ].forEach((el) => el?.classList.add("hidden"));
+
+  if (!user || !token) return;
+
+  const role = String(user.role || "").toLowerCase();
+
+  if (role === "buyer") {
+    myBookingsLink?.classList.remove("hidden");
+    savedLink?.classList.remove("hidden");
+  }
+
+  if (role === "seller" || role === "agent") {
+    myListingsLink?.classList.remove("hidden");
+    postPropertyBtn?.classList.remove("hidden");
+  }
+
+  if (role === "admin") {
+    adminLink?.classList.remove("hidden");
+    usersLink?.classList.remove("hidden");
+    myListingsLink?.classList.remove("hidden");
+    postPropertyBtn?.classList.remove("hidden");
+  }
 }
 
-/* LOGOUT */
+/* =============================
+   PROFILE DROPDOWN
+============================= */
 
-function handleLogout(){
+function handleProfileDropdown() {
+  const toggle = document.getElementById("profileToggle");
+  const menu = document.getElementById("dropdownMenu");
 
-const logoutBtn = document.getElementById("logoutBtn");
+  if (!toggle || !menu || toggle.dataset.bound === "true") return;
 
-if(!logoutBtn) return;
+  toggle.dataset.bound = "true";
 
-logoutBtn.addEventListener("click",()=>{
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.toggle("open");
+  });
 
-Storage.clear();
-window.location.href = "index.html";
-
-});
-
+  document.addEventListener("click", (e) => {
+    if (!menu.contains(e.target) && e.target !== toggle) {
+      menu.classList.remove("open");
+    }
+  });
 }
 
-/* ROLE LINKS */
+/* =============================
+   MOBILE NAV
+============================= */
 
-function handleRoleLinks(){
+function handleMobileToggle() {
+  const navToggle = document.getElementById("navToggle");
+  const mainNav = document.getElementById("mainNav");
 
-const user = Storage.getUser();
-const token = Storage.getToken();
+  if (!navToggle || !mainNav || navToggle.dataset.bound === "true") return;
 
-if(!user || !token) return;
+  navToggle.dataset.bound = "true";
 
-const role = user.role;
-
-const myListingsLink = document.getElementById("myListingsLink");
-const myBookingsLink = document.getElementById("myBookingsLink");
-const adminLink = document.getElementById("adminLink");
-const postPropertyBtn = document.getElementById("postPropertyBtn");
-
-if(role === "buyer"){
-
-if(myBookingsLink) myBookingsLink.classList.remove("hidden");
-
-if(myListingsLink) myListingsLink.remove();
-if(postPropertyBtn) postPropertyBtn.remove();
-
+  navToggle.addEventListener("click", () => {
+    mainNav.classList.toggle("nav--open");
+    navToggle.classList.toggle("active");
+  });
 }
 
-if(["seller","agent"].includes(role)){
+/* =============================
+   SCROLL EFFECT
+============================= */
 
-if(myListingsLink) myListingsLink.classList.remove("hidden");
-if(postPropertyBtn) postPropertyBtn.classList.remove("hidden");
+function handleScrollEffect() {
+  const header = document.querySelector(".app-header");
+  if (!header) return;
 
+  const updateHeader = () => {
+    header.classList.toggle("scrolled", window.scrollY > 10);
+  };
+
+  updateHeader();
+
+  window.addEventListener(
+    "scroll",
+    window.Utils?.throttle?.(updateHeader, 150) || updateHeader
+  );
 }
 
-if(role === "admin"){
+/* =============================
+   ACTIVE LINK
+============================= */
 
-if(adminLink) adminLink.classList.remove("hidden");
+function setActiveNavLink() {
+  const links = document.querySelectorAll(".nav a, .main-nav a");
+  const current = window.location.pathname.split("/").pop() || "index.html";
 
+  links.forEach((link) => {
+    const href = link.getAttribute("href");
+
+    if (!href) return;
+
+    const cleanHref = href.split("?")[0];
+
+    if (cleanHref === current) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
 }
 
-}
+/* expose globally */
 
-/* PROFILE DROPDOWN */
-
-function handleProfileDropdown(){
-
-const toggle = document.getElementById("profileToggle");
-const menu = document.getElementById("dropdownMenu");
-
-if(!toggle || !menu) return;
-
-toggle.addEventListener("click",(e)=>{
-
-e.stopPropagation();
-menu.classList.toggle("open");
-
-});
-
-document.addEventListener("click",(e)=>{
-
-if(!menu.contains(e.target) && e.target !== toggle){
-menu.classList.remove("open");
-}
-
-});
-
-}
-
-/* MOBILE NAV */
-
-function handleMobileToggle(){
-
-const navToggle = document.getElementById("navToggle");
-const mainNav = document.getElementById("mainNav");
-
-if(!navToggle || !mainNav) return;
-
-navToggle.addEventListener("click",()=>{
-mainNav.classList.toggle("nav--open");
-});
-
-}
-
-/* SCROLL EFFECT */
-
-function handleScrollEffect(){
-
-const header = document.querySelector(".app-header");
-
-if(!header) return;
-
-window.addEventListener("scroll",()=>{
-
-if(window.scrollY > 10){
-header.classList.add("scrolled");
-}else{
-header.classList.remove("scrolled");
-}
-
-});
-
-}
-
-/* ACTIVE LINK */
-
-function setActiveNavLink(){
-
-const links = document.querySelectorAll(".nav a");
-const current = window.location.pathname.split("/").pop();
-
-links.forEach(link=>{
-
-const href = link.getAttribute("href");
-
-if(href === current){
-link.classList.add("active");
-}
-
-});
-
-}
+window.initNavbar = initNavbar;

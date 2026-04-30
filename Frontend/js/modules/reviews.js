@@ -7,143 +7,153 @@ document.addEventListener("DOMContentLoaded", initReviews);
 let propertyId = null;
 
 /* =============================
-INIT
+   INIT
 ============================= */
 
-function initReviews(){
+function initReviews() {
+  propertyId = new URLSearchParams(window.location.search).get("id");
 
-const params = new URLSearchParams(window.location.search);
+  if (!propertyId) return;
 
-propertyId = params.get("id");
-
-if(!propertyId) return;
-
-loadReviews();
-initReviewForm();
-
+  loadReviews();
+  initReviewForm();
 }
-
 
 /* =============================
-LOAD REVIEWS
+   RESPONSE HELPER
 ============================= */
 
-async function loadReviews(){
-
-const container = document.getElementById("reviewList");
-
-if(!container) return;
-
-try{
-
-const reviews = await apiRequest(`/reviews/${propertyId}`);
-
-if(!reviews || reviews.length === 0){
-
-container.innerHTML = `
-<p class="muted-text">No reviews yet.</p>
-`;
-
-return;
-
+function getResponseData(response, fallback = []) {
+  if (!response) return fallback;
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.data)) return response.data;
+  return fallback;
 }
-
-container.innerHTML = reviews.map(r => `
-
-<div class="review-card">
-
-<strong>${escapeHTML(r.user_name)}</strong>
-
-<div class="review-rating">
-${"⭐".repeat(r.rating)}
-</div>
-
-<p>${escapeHTML(r.comment)}</p>
-
-<span class="review-date">
-${formatDate(r.created_at)}
-</span>
-
-</div>
-
-`).join("");
-
-}
-catch(err){
-
-console.error(err);
-
-}
-
-}
-
 
 /* =============================
-SUBMIT REVIEW
+   LOAD REVIEWS
 ============================= */
 
-function initReviewForm(){
+async function loadReviews() {
+  const container = document.getElementById("reviewList");
+  if (!container) return;
 
-const form = document.getElementById("reviewForm");
+  try {
+    const res = await window.API.get(`/reviews/${propertyId}`);
+    const reviews = getResponseData(res, []);
 
-if(!form) return;
+    if (!reviews.length) {
+      container.innerHTML = `<p class="muted-text">No reviews yet.</p>`;
+      return;
+    }
 
-form.addEventListener("submit", async e => {
-
-e.preventDefault();
-
-const data = Object.fromEntries(new FormData(form));
-
-data.property_id = propertyId;
-
-try{
-
-await apiRequest("/reviews","POST",data);
-
-notify("Review submitted","success");
-
-form.reset();
-
-loadReviews();
-
+    container.innerHTML = reviews.map(renderReviewCard).join("");
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<p class="muted-text">Failed to load reviews.</p>`;
+  }
 }
-catch(err){
-
-console.error(err);
-
-notify("Failed to submit review","error");
-
-}
-
-});
-
-}
-
 
 /* =============================
-UTILS
+   REVIEW CARD
 ============================= */
 
-function formatDate(date){
+function renderReviewCard(review) {
+  const rating = Math.max(1, Math.min(5, Number(review.rating || 1)));
 
-return new Date(date).toLocaleDateString();
+  return `
+    <div class="review-card">
+      <strong>${escapeHTML(review.user_name || "User")}</strong>
 
+      <div class="review-rating">
+        ${"⭐".repeat(rating)}
+      </div>
+
+      <p>${escapeHTML(review.comment || "")}</p>
+
+      <span class="review-date">
+        ${
+          window.Utils?.formatDate?.(review.created_at) ||
+          formatDate(review.created_at)
+        }
+      </span>
+    </div>
+  `;
 }
 
-function escapeHTML(str){
+/* =============================
+   SUBMIT REVIEW
+============================= */
 
-return str?.replace(/[&<>"']/g,function(m){
+function initReviewForm() {
+  const form = document.getElementById("reviewForm");
+  if (!form) return;
 
-return({
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
+    const user = window.Storage?.getUser?.();
 
-})[m];
+    if (!user) {
+      window.notify?.("Please login to submit review", "error");
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1000);
+      return;
+    }
 
-});
+    const submitBtn = form.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.disabled = true;
 
+    const data = Object.fromEntries(new FormData(form));
+
+    data.property_id = Number(propertyId);
+    data.rating = Number(data.rating || 5);
+    data.comment = data.comment?.trim() || "";
+
+    try {
+      window.showLoader?.();
+
+      await window.API.post("/reviews", data);
+
+      window.notify?.("Review submitted successfully", "success");
+
+      form.reset();
+      await loadReviews();
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Failed to submit review", "error");
+    } finally {
+      window.hideLoader?.();
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
 }
+
+/* =============================
+   UTILS
+============================= */
+
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d)) return "-";
+  return d.toLocaleDateString("en-IN");
+}
+
+function escapeHTML(value) {
+  const str = String(value ?? "");
+
+  return str.replace(/[&<>"']/g, (m) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m];
+  });
+}
+
+window.loadReviews = loadReviews;
+window.initReviews = initReviews;

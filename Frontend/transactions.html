@@ -2,248 +2,216 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transactions – REMS</title>
 
-<title>Transactions – REMS</title>
+  <meta
+    name="description"
+    content="View and manage property transactions and payment history on REMS."
+  >
 
-<meta name="description"
-content="View and manage property transactions and payment history">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/responsive.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
 
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
 
-<header id="header"></header>
-
-<main class="section dashboard-page">
-
-<div class="container">
-
-<!-- PAGE HEADER -->
-
-<div class="dashboard-header">
-
-<div>
-
-<h1>Transactions</h1>
-
-<p class="muted-text">
-
-Track payments and booking transactions
-
-</p>
-
-</div>
-
-</div>
-
-
-<!-- SUMMARY -->
-
-<section class="section section-light">
-
-<div class="dashboard-grid">
-
-<div class="card summary-card">
-
-<h3 id="totalTransactions">0</h3>
-
-<p>Total Transactions</p>
-
-</div>
-
-<div class="card summary-card">
-
-<h3 id="completedTransactions">0</h3>
-
-<p>Completed</p>
-
-</div>
-
-<div class="card summary-card">
-
-<h3 id="pendingTransactions">0</h3>
-
-<p>Pending</p>
-
-</div>
-
-<div class="card summary-card">
-
-<h3 id="cancelledTransactions">0</h3>
-
-<p>Cancelled</p>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- FILTER BAR -->
-
-<div class="card filter-bar">
-
-<div class="filter-group">
-
-<label>Search</label>
-
-<input
-type="text"
-id="searchTransaction"
-placeholder="Search property">
-
-</div>
-
-<div class="filter-group">
-
-<label>Status</label>
-
-<select id="statusFilter" aria-label="Filter by transaction status">
-
-<option value="">All</option>
-<option value="Completed">Completed</option>
-<option value="Pending">Pending</option>
-<option value="Cancelled">Cancelled</option>
-
-</select>
-
-</div>
-
-<div class="filter-actions">
-
-<button
-id="applyTransactionFilter"
-class="btn btn--outline">
-
-Apply
-
-</button>
-
-<button
-id="resetTransactionFilter"
-class="btn btn--outline">
-
-Reset
-
-</button>
-
-</div>
-
-</div>
-
-
-<!-- TABLE -->
-
-<section class="section">
-
-<div class="table-responsive card">
-
-<table class="table">
-
-<thead>
-
-<tr>
-
-<th>ID</th>
-<th>Property</th>
-<th>User</th>
-<th>Amount</th>
-<th>Date</th>
-<th>Status</th>
-
-</tr>
-
-</thead>
-
-<tbody id="transactionTable">
-
-<tr>
-
-<td colspan="6" class="loading-state">
-
-Loading transactions...
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-
-<!-- EMPTY -->
-
-<div
-id="transactionEmpty"
-class="empty-state hidden">
-
-<h3>No transactions found</h3>
-
-<p>No transaction history available.</p>
-
-</div>
-
-
-<!-- PAGINATION -->
-
-<div
-id="transactionPagination"
-class="pagination">
-
-</div>
-
-</section>
-
-</div>
-
-</main>
-
-<footer id="footer"></footer>
-
-<button
-id="topBtn"
-class="btn btn-circle hidden">
-
-↑
-
-</button>
-
-
-<!-- CORE -->
-
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
-
-<!-- UI -->
-
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/notifications.js"></script>
-
-<!-- MODULE -->
-
-<script src="js/modules/transactions.js"></script>
-
-<!-- MAIN -->
-
-<script src="js/main.js"></script>
+  <header id="header"></header>
+
+  <main class="section dashboard-page">
+
+    <div class="container">
+
+      <!-- PAGE HEADER -->
+      <div class="dashboard-header">
+        <div>
+          <h1>Transactions</h1>
+
+          <p class="muted-text">
+            Track payments and booking transactions
+          </p>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <section class="section section-light">
+        <div class="dashboard-grid">
+
+          <div class="card summary-card">
+            <h3 id="totalTransactions">0</h3>
+            <p>Total Transactions</p>
+          </div>
+
+          <div class="card summary-card">
+            <h3 id="completedTransactions">0</h3>
+            <p>Completed</p>
+          </div>
+
+          <div class="card summary-card">
+            <h3 id="pendingTransactions">0</h3>
+            <p>Pending</p>
+          </div>
+
+          <div class="card summary-card">
+            <h3 id="cancelledTransactions">0</h3>
+            <p>Cancelled</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- FILTER BAR -->
+      <div class="card filter-bar">
+
+        <div class="filter-group">
+          <label for="searchTransaction">Search</label>
+
+          <input
+            type="text"
+            id="searchTransaction"
+            placeholder="Search property or user"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="statusFilter">Status</label>
+
+          <select id="statusFilter" aria-label="Filter by transaction status">
+            <option value="">All</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button
+            id="resetTransactionFilter"
+            type="button"
+            class="btn btn--outline">
+            Reset
+          </button>
+        </div>
+
+      </div>
+
+      <!-- TABLE -->
+      <section class="section">
+
+        <div class="table-responsive card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Property</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="transactionTable" aria-live="polite">
+              <tr>
+                <td colspan="6" class="loading-state">
+                  Loading transactions...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- EMPTY -->
+        <div
+          id="transactionEmpty"
+          class="empty-state hidden">
+
+          <h3>No transactions found</h3>
+          <p>No transaction history available.</p>
+
+        </div>
+
+        <!-- PAGINATION -->
+        <div
+          id="transactionPagination"
+          class="pagination">
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer id="footer"></footer>
+
+  <button
+    id="topBtn"
+    class="btn btn-circle hidden"
+    aria-label="Back to top">
+    ↑
+  </button>
+
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
+
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
+
+  <!-- Module JS -->
+  <script src="js/modules/transactions.js" defer></script>
+
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("resetTransactionFilter")?.addEventListener("click", () => {
+        const search = document.getElementById("searchTransaction");
+        const status = document.getElementById("statusFilter");
+
+        if (search) search.value = "";
+        if (status) status.value = "";
+
+        if (window.renderTransactions && Array.isArray(window.allTransactions)) {
+          window.renderTransactions(window.allTransactions);
+        } else {
+          window.location.reload();
+        }
+      });
+    });
+  </script>
+
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
 
 </body>
 </html>

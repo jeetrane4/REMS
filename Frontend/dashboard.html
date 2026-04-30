@@ -2,20 +2,38 @@
 <html lang="en" data-theme="light">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – REMS</title>
 
-<title>Dashboard – REMS</title>
+  <meta name="description" content="Manage your REMS account, properties, bookings, and transactions.">
 
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/navigation.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/responsive.css">
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 
 <body>
@@ -42,7 +60,7 @@
 
 <a href="add-property.html"
 class="btn btn--primary"
-data-role="seller">
+data-role="seller,agent">
 
 + Add Property
 
@@ -50,7 +68,7 @@ data-role="seller">
 
 <a href="dashboard-properties.html"
 class="btn btn--outline"
-data-role="seller">
+data-role="seller,agent">
 
 Manage Properties
 
@@ -67,7 +85,8 @@ Manage Properties
 
 <div
 id="dashboardSummary"
-class="dashboard-grid">
+class="dashboard-grid"
+aria-live="polite">
 
 <div class="dashboard-card skeleton"></div>
 <div class="dashboard-card skeleton"></div>
@@ -121,7 +140,7 @@ View scheduled visits
 
 <a href="add-property.html"
 class="card quick-action"
-data-role="seller">
+data-role="seller,agent">
 
 <h3>Add Property</h3>
 
@@ -176,7 +195,8 @@ Update profile
 
 <div
 id="recentActivity"
-class="card activity-list">
+class="card activity-list"
+aria-live="polite">
 
 <div class="activity-loading">
 
@@ -194,34 +214,32 @@ Loading activity...
 
 <footer id="footer"></footer>
 
-<button id="topBtn" class="btn btn-circle hidden">
-
+<button id="topBtn" class="btn btn-circle hidden" aria-label="Back to top">
 ↑
-
 </button>
 
 
 <!-- CORE -->
 
-<script src="js/core/storage.js"></script>
-<script src="js/core/utils.js"></script>
-<script src="js/core/api.js"></script>
+<script src="js/core/storage.js" defer></script>
+<script src="js/core/utils.js" defer></script>
+<script src="js/core/api.js" defer></script>
 
 <!-- UI -->
 
-<script src="js/ui/loader.js"></script>
-<script src="js/ui/navbar.js"></script>
-<script src="js/ui/theme.js"></script>
-<script src="js/ui/notifications.js"></script>
+<script src="js/ui/loader.js" defer></script>
+<script src="js/ui/navbar.js" defer></script>
+<script src="js/ui/theme.js" defer></script>
+<script src="js/ui/notifications.js" defer></script>
 
 <!-- MODULES -->
 
-<script src="js/modules/dashboard.js"></script>
-<script src="js/modules/booking.js"></script>
+<script src="js/modules/dashboard.js" defer></script>
+<script src="js/modules/booking.js" defer></script>
 
 <!-- MAIN -->
 
-<script src="js/main.js"></script>
+<script src="js/main.js" defer></script>
 
 </body>
 </html>

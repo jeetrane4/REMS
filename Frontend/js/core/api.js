@@ -1,23 +1,26 @@
 // =============================
-// REMS API CLIENT (UPGRADED)
+// REMS API CLIENT
 // =============================
 
 const API_BASE = window.API_BASE || "http://localhost:5000/api";
 
 /* =============================
-CORE REQUEST ENGINE
+   CORE REQUEST ENGINE
 ============================= */
 
-async function apiRequest(endpoint, method = "GET", body = null, retries = 1) {
+async function apiRequest(endpoint, method = "GET", body = null, retries = 0) {
+  const token = window.Storage?.getToken?.();
 
-  const token = Storage?.getToken?.();
+  const headers = {};
 
-  const headers = {
-    "Content-Type": "application/json"
-  };
+  const isFormData = body instanceof FormData;
+
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const options = {
@@ -26,11 +29,10 @@ async function apiRequest(endpoint, method = "GET", body = null, retries = 1) {
   };
 
   if (body) {
-    options.body = JSON.stringify(body);
+    options.body = isFormData ? body : JSON.stringify(body);
   }
 
   try {
-
     const response = await fetch(`${API_BASE}${endpoint}`, options);
 
     let data = null;
@@ -42,54 +44,45 @@ async function apiRequest(endpoint, method = "GET", body = null, retries = 1) {
     }
 
     if (!response.ok) {
-
       if (response.status === 401) {
+        window.Storage?.clear?.();
 
-        Storage?.clear?.();
-
-        notify?.("Session expired. Please login again.", "error");
+        window.notify?.("Session expired. Please login again.", "error");
 
         setTimeout(() => {
           window.location.href = "login.html";
-        }, 1000);
+        }, 700);
       }
 
       throw new Error(data?.message || `API error (${response.status})`);
     }
 
     return data;
-
   } catch (error) {
-
     console.error("API ERROR:", error);
 
     if (retries > 0) {
       return apiRequest(endpoint, method, body, retries - 1);
     }
 
-    notify?.(error.message || "Network error", "error");
-
+    window.notify?.(error.message || "Network error", "error");
     throw error;
   }
 }
 
 /* =============================
-API SHORTCUTS
+   API SHORTCUTS
 ============================= */
 
 const API = {
-
-  get: (url) => apiRequest(url),
-
+  get: (url) => apiRequest(url, "GET"),
   post: (url, data) => apiRequest(url, "POST", data),
-
   put: (url, data) => apiRequest(url, "PUT", data),
-
-  delete: (url) => apiRequest(url, "DELETE")
-
+  patch: (url, data) => apiRequest(url, "PATCH", data),
+  delete: (url) => apiRequest(url, "DELETE"),
+  upload: (url, formData) => apiRequest(url, "POST", formData)
 };
 
-/* expose globally */
-
+window.API_BASE = API_BASE;
 window.apiRequest = apiRequest;
 window.API = API;

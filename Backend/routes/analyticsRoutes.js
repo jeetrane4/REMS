@@ -1,20 +1,21 @@
 const express = require("express");
+
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
-const role = require("../middleware/roleMiddleware");
+const authorize = require("../middleware/roleMiddleware");
 
 const analyticsController = require("../controllers/analyticsController");
 
 /* =========================
-ADMIN ANALYTICS
+   ADMIN ANALYTICS
 ========================= */
 
 router.get(
-"/",
-protect,
-role(["admin"]),
-analyticsController.getAnalytics
+  "/",
+  protect,
+  authorize(["admin"]),
+  analyticsController.getAnalytics
 );
 
 module.exports = router;
