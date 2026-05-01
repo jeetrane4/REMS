@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Compare Properties – REMS</title>
+
+  <meta
+    name="description"
+    content="Compare selected real estate properties by price, location, type, bedrooms, bathrooms, area, status, and amenities."
+  >
+
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <style>
+    .compare-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .compare-selected-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .compare-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+      background: var(--color-surface, #f4f7fb);
+      border: 1px solid var(--color-border, #dce3ee);
+      font-size: 0.9rem;
+    }
+
+    .compare-chip button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 700;
+      color: #d11a2a;
+    }
+
+    .comparison-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .comparison-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      border: 1px solid var(--color-border, #dce3ee);
+      padding: 0.85rem;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .comparison-table th {
+      width: 180px;
+      background: var(--color-surface, #f4f7fb);
+      font-weight: 700;
+    }
+
+    .comparison-table img {
+      width: 220px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+    }
+
+    .compare-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .property-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .picker-card {
+      border: 1px solid var(--color-border, #dce3ee);
+      border-radius: 16px;
+      padding: 1rem;
+      background: var(--color-card, #fff);
+    }
+
+    .picker-card h4 {
+      margin-bottom: 0.4rem;
+    }
+
+    .picker-card p {
+      margin-bottom: 0.35rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header id="header"></header>
+
+  <main class="section">
+    <div class="container">
+
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html">Home</a>
+        <span>›</span>
+        <a href="listings.html">Listings</a>
+        <span>›</span>
+        <span>Compare Properties</span>
+      </nav>
+
+      <div class="dashboard-header">
+        <div>
+          <h1>Compare Properties</h1>
+          <p class="muted-text">
+            Compare 2 to 5 selected properties side by side.
+          </p>
+        </div>
+
+        <div class="dashboard-actions">
+          <a href="listings.html" class="btn btn--outline">
+            Browse Listings
+          </a>
+        </div>
+      </div>
+
+      <section class="card section">
+        <div class="compare-toolbar">
+          <div>
+            <h3>Selected Properties</h3>
+            <p class="muted-text">
+              Selected count:
+              <strong id="compareCount">0</strong>
+              / 5
+            </p>
+          </div>
+
+          <div class="compare-actions">
+            <button id="compareBtn" type="button" class="btn btn--primary">
+              Compare Now
+            </button>
+
+            <button id="clearCompareBtn" type="button" class="btn btn--outline">
+              Clear Compare
+            </button>
+          </div>
+        </div>
+
+        <div id="selectedCompareList" class="compare-selected-list">
+          <p class="muted-text">No properties selected yet.</p>
+        </div>
+
+        <div id="compareHint" class="empty-state">
+          <h3>Select at least 2 properties</h3>
+          <p>
+            Go to listings or property details page and click Compare Property.
+            Then return here to view comparison.
+          </p>
+          <a href="listings.html" class="btn btn--primary">Go to Listings</a>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section__header">
+          <h3>Comparison Result</h3>
+        </div>
+
+        <div class="comparison-table-wrapper">
+          <table id="comparisonTable" class="comparison-table"></table>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section__header">
+          <h3>Quick Add Approved Properties</h3>
+        </div>
+
+        <p class="muted-text">
+          Use this section during demo if you want to quickly add properties to comparison.
+        </p>
+
+        <div id="propertyPicker" class="property-picker-grid">
+          <div class="loading-state">Loading properties...</div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+
+  <button id="topBtn" class="btn btn-circle hidden" aria-label="Back to top">
+    ↑
+  </button>
+
+  <!-- Core JS -->
+  <script src="js/core/storage.js" defer></script>
+  <script src="js/core/utils.js" defer></script>
+  <script src="js/core/api.js" defer></script>
+
+  <!-- UI JS -->
+  <script src="js/ui/loader.js" defer></script>
+  <script src="js/ui/notifications.js" defer></script>
+  <script src="js/ui/navbar.js" defer></script>
+  <script src="js/ui/theme.js" defer></script>
+  <script src="js/ui/modals.js" defer></script>
+
+  <!-- Existing Comparison Module -->
+  <script src="js/modules/comparison.js?v=20260501-1" defer></script>
+
+  <!-- Page Logic -->
+  <script defer>
+    const COMPARE_STORAGE_KEY = "rems_compare";
+    const MAX_COMPARE_ITEMS = 5;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      bindComparePageButtons();
+      renderSelectedCompareList();
+      await loadPropertyPicker();
+
+      setTimeout(() => {
+        renderSelectedCompareList();
+
+        const selected = getCompareIds();
+
+        if (selected.length >= 2 && typeof window.compareSelected === "function") {
+          window.compareSelected();
+        }
+      }, 250);
+    });
+
+    function bindComparePageButtons() {
+      document.getElementById("clearCompareBtn")?.addEventListener("click", () => {
+        localStorage.setItem(COMPARE_STORAGE_KEY, "[]");
+
+        if (typeof window.clearComparison === "function") {
+          window.clearComparison();
+        }
+
+        renderSelectedCompareList();
+
+        const table = document.getElementById("comparisonTable");
+        if (table) table.innerHTML = "";
+
+        window.notify?.("Comparison cleared", "info");
+      });
+    }
+
+    function getCompareIds() {
+      try {
+        const ids = JSON.parse(localStorage.getItem(COMPARE_STORAGE_KEY) || "[]");
+        return Array.isArray(ids)
+          ? ids.map(Number).filter(Boolean).slice(0, MAX_COMPARE_ITEMS)
+          : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveCompareIds(ids) {
+      const cleanIds = [...new Set(ids.map(Number).filter(Boolean))].slice(0, MAX_COMPARE_ITEMS);
+      localStorage.setItem(COMPARE_STORAGE_KEY, JSON.stringify(cleanIds));
+
+      const count = document.getElementById("compareCount");
+      if (count) count.textContent = cleanIds.length;
+    }
+
+    function addToCompare(propertyId) {
+      const id = Number(propertyId);
+      if (!id) return;
+
+      let ids = getCompareIds();
+
+      if (ids.includes(id)) {
+        window.notify?.("Property already added", "info");
+        return;
+      }
+
+      if (ids.length >= MAX_COMPARE_ITEMS) {
+        window.notify?.("You can compare maximum 5 properties", "warning");
+        return;
+      }
+
+      ids.push(id);
+      saveCompareIds(ids);
+      renderSelectedCompareList();
+
+      window.notify?.("Property added to compare", "success");
+
+      if (ids.length >= 2 && typeof window.compareSelected === "function") {
+        window.compareSelected();
+      }
+    }
+
+    function removeFromCompare(propertyId) {
+      const id = Number(propertyId);
+      let ids = getCompareIds().filter((item) => item !== id);
+
+      saveCompareIds(ids);
+      renderSelectedCompareList();
+
+      const table = document.getElementById("comparisonTable");
+
+      if (ids.length >= 2 && typeof window.compareSelected === "function") {
+        window.compareSelected();
+      } else if (table) {
+        table.innerHTML = "";
+      }
+    }
+
+    async function renderSelectedCompareList() {
+      const container = document.getElementById("selectedCompareList");
+      const hint = document.getElementById("compareHint");
+      const count = document.getElementById("compareCount");
+      const compareBtn = document.getElementById("compareBtn");
+
+      if (!container) return;
+
+      const ids = getCompareIds();
+
+      if (count) count.textContent = ids.length;
+      if (compareBtn) compareBtn.disabled = ids.length < 2;
+
+      if (!ids.length) {
+        container.innerHTML = `<p class="muted-text">No properties selected yet.</p>`;
+        hint?.classList.remove("hidden");
+        return;
+      }
+
+      hint?.classList.toggle("hidden", ids.length >= 2);
+
+      container.innerHTML = ids.map((id) => {
+        return `
+          <span class="compare-chip">
+            Property ID: ${escapeHTML(id)}
+            <button type="button" onclick="removeFromCompare(${id})" aria-label="Remove property ${id}">
+              ×
+            </button>
+          </span>
+        `;
+      }).join("");
+    }
+
+    async function loadPropertyPicker() {
+      const container = document.getElementById("propertyPicker");
+      if (!container) return;
+
+      try {
+        const res = await window.API.get("/properties?limit=12");
+        const properties = Array.isArray(res?.data) ? res.data : [];
+
+        if (!properties.length) {
+          container.innerHTML = `
+            <div class="empty-state">
+              No approved properties found. Approve at least two properties first.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = properties.map((property) => {
+          const image = resolveImage(
+            property.image ||
+            property.image_url ||
+            property.images?.[0]?.image_url ||
+            property.images?.[0] ||
+            "images/img1.webp"
+          );
+
+          const price =
+            window.Utils?.formatCurrency?.(property.price) ||
+            `₹${Number(property.price || 0).toLocaleString("en-IN")}`;
+
+          return `
+            <div class="picker-card">
+              <img
+                src="${escapeHTML(image)}"
+                alt="${escapeHTML(property.title || "Property")}"
+                style="width:100%;height:130px;object-fit:cover;border-radius:12px;margin-bottom:0.75rem;"
+                onerror="this.onerror=null;this.src='images/img1.webp';"
+              >
+
+              <h4>${escapeHTML(property.title || "Untitled Property")}</h4>
+
+              <p class="muted-text">
+                ${escapeHTML(property.city || "-")} • ${escapeHTML(property.type || "-")}
+              </p>
+
+              <p><strong>${price}</strong></p>
+
+              <div class="compare-actions">
+                <button
+                  type="button"
+                  class="btn btn--primary btn--small"
+                  onclick="addToCompare(${Number(property.property_id)})">
+                  Add
+                </button>
+
+                <a
+                  href="listing-details.html?id=${Number(property.property_id)}"
+                  class="btn btn--outline btn--small">
+                  View
+                </a>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `
+          <div class="empty-state">
+            Failed to load properties.
+          </div>
+        `;
+      }
+    }
+
+    function resolveImage(image) {
+      if (!image) return "images/img1.webp";
+
+      if (typeof image === "object") {
+        image = image.image_url || image.url || image.src || "";
+      }
+
+      if (typeof image !== "string" || !image.trim()) {
+        return "images/img1.webp";
+      }
+
+      image = image.trim();
+
+      if (image.startsWith("http://") || image.startsWith("https://")) {
+        return image;
+      }
+
+      if (image.startsWith("/uploads")) {
+        const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+        return `${base}${image}`;
+      }
+
+      if (image.startsWith("uploads/")) {
+        const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+        return `${base}/${image}`;
+      }
+
+      return image;
+    }
+
+    function escapeHTML(value) {
+      const str = String(value ?? "");
+
+      return str.replace(/[&<>"']/g, (m) => {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        }[m];
+      });
+    }
+
+    window.addToCompare = addToCompare;
+    window.removeFromCompare = removeFromCompare;
+  </script>
+
+  <!-- Main JS -->
+  <script src="js/main.js" defer></script>
+
+</body>
+</html>
