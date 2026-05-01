@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Backend/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "Frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "Backend/server.js"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "Backend/server.js"
+    },
+    {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|webp|gif|svg|ico|html))",
+      "dest": "Frontend/$1"
+    },
+    {
+      "src": "/",
+      "dest": "Frontend/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "Frontend/$1"
+    }
+  ]
+}
