@@ -230,6 +230,7 @@
       document.getElementById("comparePropertyBtn")?.addEventListener("click", () => {
         if (propertyId && window.toggleCompare) {
           window.toggleCompare(Number(propertyId));
+          window.location.href = "compare.html";
         }
       });
 
