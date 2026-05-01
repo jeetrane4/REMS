@@ -160,7 +160,6 @@ async function initPropertyList() {
 /* =================================================
    ADD PROPERTY
 ================================================= */
-
 function initAddProperty() {
   const form = document.getElementById("addPropertyForm");
   if (!form) return;
@@ -168,8 +167,27 @@ function initAddProperty() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const user = window.Storage?.getUser?.();
+
+    if (!user || !window.Storage?.getToken?.()) {
+      window.notify?.("Please login before adding property", "error");
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 800);
+      return;
+    }
+
+    if (!["seller", "agent", "admin"].includes(user.role)) {
+      window.notify?.("Only seller, agent, or admin can add property", "error");
+      return;
+    }
+
     const submitBtn = document.getElementById("submitPropertyBtn");
-    if (submitBtn) submitBtn.disabled = true;
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+    }
 
     const formData = new FormData(form);
 
@@ -193,7 +211,7 @@ function initAddProperty() {
         key !== "amenities" &&
         !documentFields.includes(key)
       ) {
-        propertyPayload[key] = value;
+        propertyPayload[key] = typeof value === "string" ? value.trim() : value;
       }
     });
 
@@ -209,27 +227,53 @@ function initAddProperty() {
       window.showLoader?.();
 
       const res = await window.API.post("/properties", propertyPayload);
-      const property = getResponseData(res, null);
-      const propertyId = property?.property_id;
+      const property = res?.data || res;
+      const propertyId = property?.property_id || property?.id;
 
       if (!propertyId) {
-        throw new Error("Property created but property ID not returned");
+        throw new Error("Property created but property ID was not returned");
       }
 
-      await uploadPropertyImagesFromAddForm(propertyId);
-      await uploadPropertyDocumentsFromAddForm(propertyId, documentFields);
+      let imageUploadOk = true;
+      let documentUploadOk = true;
 
-      window.notify?.("Property, images, and documents submitted successfully", "success");
+      try {
+        await uploadPropertyImagesFromAddForm(propertyId);
+      } catch (imageErr) {
+        imageUploadOk = false;
+        console.error("Image upload failed:", imageErr);
+      }
+
+      try {
+        await uploadPropertyDocumentsFromAddForm(propertyId, documentFields);
+      } catch (docErr) {
+        documentUploadOk = false;
+        console.error("Document upload failed:", docErr);
+      }
+
+      if (imageUploadOk && documentUploadOk) {
+        window.notify?.("Property, images, and documents submitted successfully", "success");
+      } else if (!imageUploadOk && documentUploadOk) {
+        window.notify?.("Property created, but image upload failed. You can upload images later.", "warning");
+      } else if (imageUploadOk && !documentUploadOk) {
+        window.notify?.("Property created, but document upload failed. You can upload documents later.", "warning");
+      } else {
+        window.notify?.("Property created, but images/documents failed. You can upload them later.", "warning");
+      }
 
       setTimeout(() => {
-        window.location.href = "dashboard-properties.html";
-      }, 1200);
+        window.location.href = `listing-details.html?id=${propertyId}`;
+      }, 1000);
     } catch (err) {
       console.error(err);
       window.notify?.(err.message || "Failed to add property", "error");
     } finally {
       window.hideLoader?.();
-      if (submitBtn) submitBtn.disabled = false;
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Property";
+      }
     }
   });
 }
@@ -247,7 +291,13 @@ async function uploadPropertyImagesFromAddForm(propertyId) {
     uploadData.append("images", file);
   });
 
-  await window.API.upload(`/property-images/${propertyId}`, uploadData);
+  const res = await window.API.upload(`/property-images/${propertyId}`, uploadData);
+
+  if (!res?.success) {
+    throw new Error(res?.message || "Image upload failed");
+  }
+
+  return res;
 }
 
 async function uploadPropertyDocumentsFromAddForm(propertyId, documentFields) {
@@ -263,7 +313,11 @@ async function uploadPropertyDocumentsFromAddForm(propertyId, documentFields) {
     uploadData.append("document_type", field);
     uploadData.append("document", input.files[0]);
 
-    await window.API.upload(`/property-documents/${propertyId}`, uploadData);
+    const res = await window.API.upload(`/property-documents/${propertyId}`, uploadData);
+
+    if (!res?.success) {
+      throw new Error(res?.message || `Document upload failed: ${field}`);
+    }
   }
 }
 
@@ -273,7 +327,13 @@ async function uploadPropertyDocumentsFromAddForm(propertyId, documentFields) {
 
 function renderPropertyCard(p) {
   const id = p.property_id || p.id;
-  const image = resolveImagePath(p.image);
+  const image = resolveImagePath(
+  p.image ||
+  p.image_url ||
+  p.images?.[0]?.image_url ||
+  p.images?.[0] ||
+  "images/img1.webp"
+);
 
   return `
     <div class="property-card">
@@ -338,23 +398,54 @@ async function initPropertyDetails() {
   const propertyId = new URLSearchParams(window.location.search).get("id");
 
   if (!propertyId) {
-    container.innerHTML = `<p class="error-text">Property ID missing.</p>`;
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>Property ID missing</h3>
+        <p>Please open this page from the listings page.</p>
+        <a href="listings.html" class="btn btn--primary">Back to Listings</a>
+      </div>
+    `;
     return;
   }
 
   try {
     window.showLoader?.();
 
-    const res = await window.API.get(`/properties/${propertyId}`);
-    const property = getResponseData(res, null);
+    console.log("DETAIL PAGE PROPERTY ID:", propertyId);
 
-    if (!property) {
+    const res = await window.API.get(`/properties/${propertyId}`);
+
+    console.log("DETAIL PAGE API RESPONSE:", res);
+
+    let property = null;
+
+    if (res?.success === true && res?.data) {
+      property = res.data;
+    } else if (res?.data?.property_id) {
+      property = res.data;
+    } else if (res?.property_id) {
+      property = res;
+    }
+
+    console.log("DETAIL PAGE FINAL PROPERTY:", property);
+
+    if (!property || !property.property_id) {
       throw new Error("Property not found");
     }
 
     renderPropertyDetails(property);
   } catch (err) {
-    console.error(err);
+    console.error("Property details load error:", err);
+
+    container.innerHTML = `
+      <div class="empty-state">
+        <h3>Property not found</h3>
+        <p>This property may not exist, or the wrong property ID is being used.</p>
+        <p class="muted-text">Current property ID: ${escapeHTML(propertyId)}</p>
+        <a href="listings.html" class="btn btn--primary">Back to Listings</a>
+      </div>
+    `;
+
     window.notify?.("Failed to load property", "error");
   } finally {
     window.hideLoader?.();

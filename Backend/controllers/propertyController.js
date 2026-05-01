@@ -395,10 +395,10 @@ exports.getMyProperties = async (req, res, next) => {
         p.*,
         u.user_name AS owner_name,
         (
-          SELECT image_url
-          FROM property_images
-          WHERE property_id = p.property_id
-          ORDER BY image_id ASC
+          SELECT pi.image_url
+          FROM property_images pi
+          WHERE pi.property_id = p.property_id
+          ORDER BY pi.image_id ASC
           LIMIT 1
         ) AS image
        FROM properties p
