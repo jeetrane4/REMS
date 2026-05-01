@@ -271,7 +271,7 @@
 
       if (!container) return;
 
-      if (!list.length) {
+      if (!Array.isArray(list) || !list.length) {
         container.innerHTML = "";
         empty?.classList.remove("hidden");
         return;
@@ -280,29 +280,39 @@
       empty?.classList.add("hidden");
 
       container.innerHTML = list.map((property) => {
-        const image = resolveImage(
-          property.image ||
-          property.image_url ||
-          property.thumbnail ||
-          property.cover_image ||
-          property.images?.[0]?.image_url ||
-          property.images?.[0]?.url ||
-          property.images?.[0] ||
-          "images/img1.webp"
+        const propertyImage =
+          property?.image ||
+          property?.image_url ||
+          property?.thumbnail ||
+          property?.cover_image ||
+          property?.images?.[0]?.image_url ||
+          property?.images?.[0]?.url ||
+          property?.images?.[0] ||
+          "images/img1.webp";
+
+        const imageSrc = resolveImage(propertyImage);
+
+        console.log(
+          "Dashboard image check:",
+          property.property_id,
+          property.title,
+          propertyImage,
+          imageSrc
         );
 
-        const price = window.Utils?.formatCurrency?.(property.price) ||
-          `₹${Number(property.price || 0).toLocaleString("en-IN")}`;
+        const price =
+          window.Utils?.formatCurrency?.(property.price) ||
+            `₹${Number(property.price || 0).toLocaleString("en-IN")}`;
 
-        return `
-          <div class="property-card">
+          return `
+            <div class="property-card">
 
             <div class="property-card__image">
               <img
-                src="${escapeHTML(image)}"
+                src="${escapeHTML(imageSrc)}"
                 alt="${escapeHTML(property.title || "Property")}"
                 loading="lazy"
-                onerror="this.src='images/img1.webp'"
+                onerror="this.onerror=null; this.src='images/img1.webp';"
               >
 
               <span class="property-badge">
@@ -341,6 +351,7 @@
                 </button>
               </div>
             </div>
+
           </div>
         `;
       }).join("");
