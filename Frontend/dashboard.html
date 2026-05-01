@@ -7,7 +7,7 @@
 
   <title>Dashboard – REMS</title>
 
-  <meta name="description" content="Manage your REMS account, properties, bookings, and transactions.">
+  <meta name="description" content="Manage your REMS account, properties, bookings, documents, and transactions.">
 
   <!-- Fonts / Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,203 +42,581 @@
 
 <main class="dashboard-page">
 
-<div class="container">
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="dashboard-header">
+
+      <div>
+        <h1 id="dashboardTitle">Dashboard</h1>
+        <p id="dashboardSubtitle" class="muted-text"></p>
+      </div>
+
+      <div id="dashboardActions" class="dashboard-actions">
+
+        <a
+          href="add-property.html"
+          class="btn btn--primary"
+          data-role="seller,agent">
+          + Add Property
+        </a>
+
+        <a
+          href="dashboard-properties.html"
+          class="btn btn--outline"
+          data-role="seller,agent">
+          Manage Properties
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- STATS -->
+    <section class="section">
+
+      <div
+        id="dashboardSummary"
+        class="dashboard-grid"
+        aria-live="polite">
+
+        <div class="dashboard-card skeleton"></div>
+        <div class="dashboard-card skeleton"></div>
+        <div class="dashboard-card skeleton"></div>
+        <div class="dashboard-card skeleton"></div>
+
+      </div>
+
+    </section>
+
+    <!-- PROFILE COMPLETION -->
+    <section class="section">
+
+      <div class="section__header">
+        <div>
+          <h2>Complete Your Profile</h2>
+          <p class="muted-text">
+            Update your personal information. This information is used across your REMS account.
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+
+        <form id="dashboardProfileForm" class="form-grid">
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label for="profileNameInput">Full Name</label>
+              <input
+                type="text"
+                id="profileNameInput"
+                name="name"
+                placeholder="Enter full name"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="profileMobileInput">Mobile Number</label>
+              <input
+                type="tel"
+                id="profileMobileInput"
+                name="mobile"
+                placeholder="Enter mobile number"
+                required
+              >
+            </div>
+
+          </div>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label for="profileEmailInput">Email</label>
+              <input
+                type="email"
+                id="profileEmailInput"
+                name="email"
+                placeholder="Email address"
+                title="Email address"
+                disabled
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="profileRoleInput">Role</label>
+              <input
+                type="text"
+                id="profileRoleInput"
+                name="role"
+                placeholder="Account role"
+                title="Account role"
+                disabled
+              >
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">
+              Update Profile
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+
+    </section>
+
+    <!-- KYC DOCUMENT UPLOAD -->
+    <section class="section">
+
+      <div class="section__header">
+        <div>
+          <h2>KYC Document Upload</h2>
+          <p class="muted-text">
+            Upload Aadhaar, PAN, Passport, or Driving License for admin verification.
+          </p>
+        </div>
+      </div>
+
+      <form
+        id="dashboardKycForm"
+        class="card form-grid"
+        enctype="multipart/form-data"
+      >
+
+        <div class="form-row">
+
+          <div class="form-group">
+            <label for="kycDocumentType">Document Type</label>
+
+            <select id="kycDocumentType" name="document_type" required>
+              <option value="">Select document</option>
+              <option value="aadhar">Aadhaar Card</option>
+              <option value="pan">PAN Card</option>
+              <option value="passport">Passport</option>
+              <option value="driving_license">Driving License</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="kycDocumentFile">Upload Document</label>
+
+            <input
+              type="file"
+              id="kycDocumentFile"
+              name="document"
+              accept=".jpg,.jpeg,.png,.webp,.pdf"
+              required
+            >
+
+            <p class="muted-text small">
+              Allowed: JPG, PNG, WEBP, PDF. Max size: 5MB.
+            </p>
+          </div>
 
-<!-- HEADER -->
+        </div>
 
-<div class="dashboard-header">
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">
+            Upload KYC Document
+          </button>
 
-<div>
+          <a href="user-documents.html" class="btn btn--outline">
+            Manage Documents
+          </a>
+        </div>
 
-<h1 id="dashboardTitle">Dashboard</h1>
+      </form>
 
-<p id="dashboardSubtitle" class="muted-text"></p>
+      <div class="table-responsive card mt-lg">
 
-</div>
+        <table class="table">
 
-<div id="dashboardActions" class="dashboard-actions">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Document</th>
+              <th>Status</th>
+            </tr>
+          </thead>
 
-<a href="add-property.html"
-class="btn btn--primary"
-data-role="seller,agent">
+          <tbody id="dashboardKycTable">
+            <tr>
+              <td colspan="4" class="loading-state">
+                Loading KYC documents...
+              </td>
+            </tr>
+          </tbody>
 
-+ Add Property
+        </table>
 
-</a>
+      </div>
 
-<a href="dashboard-properties.html"
-class="btn btn--outline"
-data-role="seller,agent">
+    </section>
 
-Manage Properties
+    <!-- QUICK ACTIONS -->
+    <section class="section section--light">
 
-</a>
+      <div class="section__header">
+        <h2>Quick Actions</h2>
+      </div>
 
-</div>
+      <div class="quick-actions-grid">
 
-</div>
+        <a
+          href="listings.html"
+          class="card quick-action"
+          data-role="buyer">
 
+          <h3>Browse Properties</h3>
+          <p class="muted-text">Find homes to buy or rent</p>
 
-<!-- STATS -->
+        </a>
 
-<section class="section">
+        <a
+          href="bookings.html"
+          class="card quick-action"
+          data-role="buyer">
 
-<div
-id="dashboardSummary"
-class="dashboard-grid"
-aria-live="polite">
+          <h3>My Bookings</h3>
+          <p class="muted-text">View scheduled visits</p>
 
-<div class="dashboard-card skeleton"></div>
-<div class="dashboard-card skeleton"></div>
-<div class="dashboard-card skeleton"></div>
-<div class="dashboard-card skeleton"></div>
+        </a>
 
-</div>
+        <a
+          href="saved-properties.html"
+          class="card quick-action"
+          data-role="buyer">
 
-</section>
+          <h3>Saved Properties</h3>
+          <p class="muted-text">View your bookmarked properties</p>
 
+        </a>
 
-<!-- QUICK ACTIONS -->
+        <a
+          href="add-property.html"
+          class="card quick-action"
+          data-role="seller,agent">
 
-<section class="section section--light">
+          <h3>Add Property</h3>
+          <p class="muted-text">List new property with images and documents</p>
 
-<div class="section__header">
+        </a>
 
-<h2>Quick Actions</h2>
+        <a
+          href="dashboard-properties.html"
+          class="card quick-action"
+          data-role="seller,agent">
 
-</div>
+          <h3>Manage Properties</h3>
+          <p class="muted-text">Track your listings and property views</p>
 
-<div class="quick-actions-grid">
+        </a>
 
-<a href="listings.html"
-class="card quick-action"
-data-role="buyer">
+        <a
+          href="property-documents.html"
+          class="card quick-action"
+          data-role="seller,agent">
 
-<h3>Browse Properties</h3>
+          <h3>Property Documents</h3>
+          <p class="muted-text">Upload ownership proof and title documents</p>
 
-<p class="muted-text">
+        </a>
 
-Find homes to buy or rent
+        <a
+          href="transactions.html"
+          class="card quick-action">
 
-</p>
+          <h3>Transactions</h3>
+          <p class="muted-text">View payment and transaction history</p>
 
-</a>
+        </a>
 
-<a href="bookings.html"
-class="card quick-action"
-data-role="buyer">
+        <a
+          href="notifications.html"
+          class="card quick-action">
 
-<h3>My Bookings</h3>
+          <h3>Notifications</h3>
+          <p class="muted-text">View account and system alerts</p>
 
-<p class="muted-text">
+        </a>
 
-View scheduled visits
+        <a
+          href="settings.html"
+          class="card quick-action">
 
-</p>
+          <h3>Settings</h3>
+          <p class="muted-text">Update account settings</p>
 
-</a>
+        </a>
 
-<a href="add-property.html"
-class="card quick-action"
-data-role="seller,agent">
+        <a
+          href="admin.html"
+          class="card quick-action"
+          data-role="admin">
 
-<h3>Add Property</h3>
+          <h3>Admin Panel</h3>
+          <p class="muted-text">Verify properties, users, and documents</p>
 
-<p class="muted-text">
+        </a>
 
-List new property
+      </div>
 
-</p>
+    </section>
 
-</a>
+    <!-- RECENT ACTIVITY -->
+    <section class="section">
 
-<a href="transactions.html"
-class="card quick-action">
+      <div class="section__header">
+        <h2>Recent Activity</h2>
+      </div>
 
-<h3>Transactions</h3>
+      <div
+        id="recentActivity"
+        class="card activity-list"
+        aria-live="polite">
 
-<p class="muted-text">
+        <div class="activity-loading">
+          Loading activity...
+        </div>
 
-View payment history
+      </div>
 
-</p>
+    </section>
 
-</a>
-
-<a href="settings.html"
-class="card quick-action">
-
-<h3>Settings</h3>
-
-<p class="muted-text">
-
-Update profile
-
-</p>
-
-</a>
-
-</div>
-
-</section>
-
-
-<!-- RECENT ACTIVITY -->
-
-<section class="section">
-
-<div class="section__header">
-
-<h2>Recent Activity</h2>
-
-</div>
-
-<div
-id="recentActivity"
-class="card activity-list"
-aria-live="polite">
-
-<div class="activity-loading">
-
-Loading activity...
-
-</div>
-
-</div>
-
-</section>
-
-</div>
+  </div>
 
 </main>
 
 <footer id="footer"></footer>
 
 <button id="topBtn" class="btn btn-circle hidden" aria-label="Back to top">
-↑
+  ↑
 </button>
 
-
 <!-- CORE -->
-
 <script src="js/core/storage.js" defer></script>
 <script src="js/core/utils.js" defer></script>
 <script src="js/core/api.js" defer></script>
 
 <!-- UI -->
-
 <script src="js/ui/loader.js" defer></script>
 <script src="js/ui/navbar.js" defer></script>
 <script src="js/ui/theme.js" defer></script>
 <script src="js/ui/notifications.js" defer></script>
 
 <!-- MODULES -->
-
 <script src="js/modules/dashboard.js" defer></script>
 <script src="js/modules/booking.js" defer></script>
 
-<!-- MAIN -->
+<!-- DASHBOARD PROFILE + KYC SCRIPT -->
+<script defer>
+document.addEventListener("DOMContentLoaded", () => {
+  initDashboardProfileForm();
+  initDashboardKycForm();
+  loadDashboardKycDocuments();
+});
 
+/* =============================
+   PROFILE FORM
+============================= */
+
+async function initDashboardProfileForm() {
+  const form = document.getElementById("dashboardProfileForm");
+  if (!form) return;
+
+  const localUser = window.Storage?.getUser?.();
+
+  if (localUser) {
+    document.getElementById("profileNameInput").value =
+      localUser.name || localUser.user_name || "";
+
+    document.getElementById("profileMobileInput").value =
+      localUser.mobile || localUser.user_mobile || "";
+
+    document.getElementById("profileEmailInput").value =
+      localUser.email || localUser.user_email || "";
+
+    document.getElementById("profileRoleInput").value =
+      localUser.role || "";
+  }
+
+  try {
+    const res = await window.API.get("/users/profile/me");
+    const profile = res?.data;
+
+    if (profile) {
+      document.getElementById("profileNameInput").value =
+        profile.user_name || "";
+
+      document.getElementById("profileMobileInput").value =
+        profile.user_mobile || "";
+
+      document.getElementById("profileEmailInput").value =
+        profile.user_email || "";
+
+      document.getElementById("profileRoleInput").value =
+        profile.role || "";
+    }
+  } catch (err) {
+    console.error("Profile load failed:", err);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form));
+
+    try {
+      window.showLoader?.();
+
+      const res = await window.API.patch("/users/profile/me", data);
+      const updated = res?.data;
+
+      if (updated) {
+        const currentUser = window.Storage.getUser() || {};
+
+        window.Storage.setUser({
+          ...currentUser,
+          name: updated.user_name,
+          email: updated.user_email,
+          mobile: updated.user_mobile,
+          role: updated.role
+        });
+      }
+
+      window.notify?.("Profile updated successfully", "success");
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "Profile update failed", "error");
+    } finally {
+      window.hideLoader?.();
+    }
+  });
+}
+
+/* =============================
+   KYC UPLOAD
+============================= */
+
+function initDashboardKycForm() {
+  const form = document.getElementById("dashboardKycForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    try {
+      window.showLoader?.();
+
+      await window.API.upload("/user-documents", formData);
+
+      window.notify?.("KYC document uploaded successfully", "success");
+
+      form.reset();
+
+      await loadDashboardKycDocuments();
+    } catch (err) {
+      console.error(err);
+      window.notify?.(err.message || "KYC upload failed", "error");
+    } finally {
+      window.hideLoader?.();
+    }
+  });
+}
+
+/* =============================
+   LOAD KYC DOCUMENTS
+============================= */
+
+async function loadDashboardKycDocuments() {
+  const table = document.getElementById("dashboardKycTable");
+  if (!table) return;
+
+  try {
+    const res = await window.API.get("/user-documents");
+    const list = res?.data || [];
+
+    if (!list.length) {
+      table.innerHTML = `
+        <tr>
+          <td colspan="4">No KYC documents uploaded.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    table.innerHTML = list.map((doc) => {
+      const link = resolveDashboardFileUrl(doc.document_url);
+
+      return `
+        <tr>
+          <td>${escapeDashboardHTML(doc.id)}</td>
+          <td>${escapeDashboardHTML(doc.document_type)}</td>
+          <td>
+            <a href="${escapeDashboardHTML(link)}" target="_blank" rel="noopener">
+              View Document
+            </a>
+          </td>
+          <td>
+            <span class="badge ${getDashboardStatusClass(doc.status)}">
+              ${escapeDashboardHTML(doc.status || "pending")}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  } catch (err) {
+    console.error(err);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="4">Failed to load KYC documents.</td>
+      </tr>
+    `;
+  }
+}
+
+/* =============================
+   HELPERS
+============================= */
+
+function resolveDashboardFileUrl(url) {
+  if (!url) return "#";
+
+  if (url.startsWith("http")) return url;
+
+  const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+
+  return `${base}${url}`;
+}
+
+function getDashboardStatusClass(status) {
+  if (status === "approved") return "badge--sale";
+  if (status === "rejected") return "badge--featured";
+  return "badge--rent";
+}
+
+function escapeDashboardHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[m]);
+}
+</script>
+
+<!-- MAIN -->
 <script src="js/main.js" defer></script>
 
 </body>

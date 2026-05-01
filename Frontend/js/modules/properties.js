@@ -168,7 +168,7 @@ function initAddProperty() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const submitBtn = form.querySelector("button[type='submit']");
+    const submitBtn = document.getElementById("submitPropertyBtn");
     if (submitBtn) submitBtn.disabled = true;
 
     const formData = new FormData(form);
@@ -177,39 +177,53 @@ function initAddProperty() {
       document.querySelectorAll('input[name="amenities"]:checked')
     ).map((a) => a.value);
 
-    const payload = Object.fromEntries(formData.entries());
+    const documentFields = [
+      "ownership_proof",
+      "title_deed",
+      "tax_receipt",
+      "building_approval",
+      "floor_plan"
+    ];
 
-    payload.amenities = amenities;
-    payload.price = Number(payload.price || 0);
-    payload.bedrooms = Number(payload.bedrooms || 0);
-    payload.bathrooms = Number(payload.bathrooms || 0);
-    payload.area = payload.area ? Number(payload.area) : null;
-    payload.latitude = payload.latitude ? Number(payload.latitude) : null;
-    payload.longitude = payload.longitude ? Number(payload.longitude) : null;
+    const propertyPayload = {};
+
+    formData.forEach((value, key) => {
+      if (
+        key !== "images" &&
+        key !== "amenities" &&
+        !documentFields.includes(key)
+      ) {
+        propertyPayload[key] = value;
+      }
+    });
+
+    propertyPayload.amenities = amenities;
+    propertyPayload.price = Number(propertyPayload.price || 0);
+    propertyPayload.bedrooms = Number(propertyPayload.bedrooms || 0);
+    propertyPayload.bathrooms = Number(propertyPayload.bathrooms || 0);
+    propertyPayload.area = propertyPayload.area ? Number(propertyPayload.area) : null;
+    propertyPayload.latitude = propertyPayload.latitude ? Number(propertyPayload.latitude) : null;
+    propertyPayload.longitude = propertyPayload.longitude ? Number(propertyPayload.longitude) : null;
 
     try {
       window.showLoader?.();
 
-      const res = await window.API.post("/properties", payload);
+      const res = await window.API.post("/properties", propertyPayload);
       const property = getResponseData(res, null);
+      const propertyId = property?.property_id;
 
-      const imageInput = form.querySelector('input[type="file"][name="images"]');
-
-      if (imageInput?.files?.length && property?.property_id) {
-        const uploadData = new FormData();
-
-        Array.from(imageInput.files).forEach((file) => {
-          uploadData.append("images", file);
-        });
-
-        await window.API.upload(`/property-images/${property.property_id}`, uploadData);
+      if (!propertyId) {
+        throw new Error("Property created but property ID not returned");
       }
 
-      window.notify?.("Property added successfully", "success");
+      await uploadPropertyImagesFromAddForm(propertyId);
+      await uploadPropertyDocumentsFromAddForm(propertyId, documentFields);
+
+      window.notify?.("Property, images, and documents submitted successfully", "success");
 
       setTimeout(() => {
         window.location.href = "dashboard-properties.html";
-      }, 1000);
+      }, 1200);
     } catch (err) {
       console.error(err);
       window.notify?.(err.message || "Failed to add property", "error");
@@ -218,6 +232,39 @@ function initAddProperty() {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
+}
+
+async function uploadPropertyImagesFromAddForm(propertyId) {
+  const imageInput = document.getElementById("images");
+
+  if (!imageInput || !imageInput.files || imageInput.files.length === 0) {
+    return;
+  }
+
+  const uploadData = new FormData();
+
+  Array.from(imageInput.files).forEach((file) => {
+    uploadData.append("images", file);
+  });
+
+  await window.API.upload(`/property-images/${propertyId}`, uploadData);
+}
+
+async function uploadPropertyDocumentsFromAddForm(propertyId, documentFields) {
+  for (const field of documentFields) {
+    const input = document.getElementById(field);
+
+    if (!input || !input.files || input.files.length === 0) {
+      continue;
+    }
+
+    const uploadData = new FormData();
+
+    uploadData.append("document_type", field);
+    uploadData.append("document", input.files[0]);
+
+    await window.API.upload(`/property-documents/${propertyId}`, uploadData);
+  }
 }
 
 /* =================================================
