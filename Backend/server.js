@@ -5,10 +5,10 @@ const { testConnection, pool } = require("./config/db");
 
 const PORT = Number(process.env.PORT) || 5000;
 
-let server;
+let server = null;
 
 /* ==============================
-   START SERVER
+   START SERVER ONLY LOCALLY
 ============================== */
 
 const startServer = async () => {
@@ -24,7 +24,16 @@ const startServer = async () => {
   }
 };
 
-startServer();
+/*
+  IMPORTANT:
+  - In local development, we start the server normally.
+  - On Vercel/production, Vercel imports this file and uses exported app.
+  - So we should NOT call app.listen() in production.
+*/
+
+if (process.env.NODE_ENV !== "production") {
+  startServer();
+}
 
 /* ==============================
    HANDLE UNCAUGHT EXCEPTIONS
@@ -33,8 +42,12 @@ startServer();
 process.on("uncaughtException", async (err) => {
   console.error("Uncaught Exception:", err.message);
 
-  if (pool) {
-    await pool.end();
+  try {
+    if (pool && process.env.NODE_ENV !== "production") {
+      await pool.end();
+    }
+  } catch (closeError) {
+    console.error("Error closing database pool:", closeError.message);
   }
 
   process.exit(1);
@@ -47,11 +60,20 @@ process.on("uncaughtException", async (err) => {
 process.on("unhandledRejection", async (err) => {
   console.error("Unhandled Promise Rejection:", err.message);
 
+  if (process.env.NODE_ENV === "production") {
+    process.exit(1);
+  }
+
   if (server) {
     server.close(async () => {
-      if (pool) {
-        await pool.end();
+      try {
+        if (pool) {
+          await pool.end();
+        }
+      } catch (closeError) {
+        console.error("Error closing database pool:", closeError.message);
       }
+
       process.exit(1);
     });
   } else {
@@ -60,26 +82,38 @@ process.on("unhandledRejection", async (err) => {
 });
 
 /* ==============================
-   GRACEFUL SHUTDOWN
+   GRACEFUL SHUTDOWN - LOCAL ONLY
 ============================== */
 
 const gracefulShutdown = async (signal) => {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
   console.log(`${signal} received. Closing REMS server...`);
 
   if (server) {
     server.close(async () => {
       console.log("HTTP server closed.");
 
-      if (pool) {
-        await pool.end();
-        console.log("Database pool closed.");
+      try {
+        if (pool) {
+          await pool.end();
+          console.log("Database pool closed.");
+        }
+      } catch (error) {
+        console.error("Error closing database pool:", error.message);
       }
 
       process.exit(0);
     });
   } else {
-    if (pool) {
-      await pool.end();
+    try {
+      if (pool) {
+        await pool.end();
+      }
+    } catch (error) {
+      console.error("Error closing database pool:", error.message);
     }
 
     process.exit(0);
@@ -88,3 +122,9 @@ const gracefulShutdown = async (signal) => {
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+/* ==============================
+   EXPORT APP FOR VERCEL
+============================== */
+
+module.exports = app;
