@@ -388,23 +388,51 @@ exports.verifyProperty = async (req, res, next) => {
 
 exports.getMyProperties = async (req, res, next) => {
   try {
-    const userId = req.user.user_id || req.user.id;
+    const userId = req.user?.user_id || req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user"
+      });
+    }
 
     const properties = await query(
-      `SELECT
+      `
+      SELECT
         p.*,
         u.user_name AS owner_name,
+        u.user_email AS owner_email,
+        u.user_mobile AS owner_mobile,
+
         (
           SELECT pi.image_url
           FROM property_images pi
           WHERE pi.property_id = p.property_id
           ORDER BY pi.image_id ASC
           LIMIT 1
-        ) AS image
-       FROM properties p
-       JOIN users u ON p.owner_id = u.user_id
-       WHERE p.owner_id = $1
-       ORDER BY p.listed_at DESC`,
+        ) AS image,
+
+        COALESCE(
+          (
+            SELECT json_agg(
+              json_build_object(
+                'image_id', pi.image_id,
+                'image_url', pi.image_url
+              )
+              ORDER BY pi.image_id ASC
+            )
+            FROM property_images pi
+            WHERE pi.property_id = p.property_id
+          ),
+          '[]'::json
+        ) AS images
+
+      FROM properties p
+      JOIN users u ON p.owner_id = u.user_id
+      WHERE p.owner_id = $1
+      ORDER BY p.listed_at DESC
+      `,
       [userId]
     );
 

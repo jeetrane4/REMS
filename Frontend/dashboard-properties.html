@@ -280,16 +280,35 @@
       empty?.classList.add("hidden");
 
       container.innerHTML = list.map((property) => {
-        const image = resolveImage(
-          property.image ||
-          property.image_url ||
-          property.thumbnail ||
-          property.cover_image ||
-          property.images?.[0]?.image_url ||
-          property.images?.[0]?.url ||
-          property.images?.[0] ||
-          "images/img1.webp"
-        );
+        function resolveImage(image) {
+          if (!image) return "images/img1.webp";
+
+          if (typeof image === "object") {
+            image = image.image_url || image.url || image.src || "";
+          }
+
+          if (typeof image !== "string" || !image.trim()) {
+            return "images/img1.webp";
+          }
+
+          image = image.trim();
+
+          if (image.startsWith("http://") || image.startsWith("https://")) {
+            return image;
+          }
+
+          if (image.startsWith("/uploads")) {
+            const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+            return `${base}${image}`;
+          }
+
+          if (image.startsWith("uploads/")) {
+            const base = (window.API_BASE || "http://localhost:5000/api").replace("/api", "");
+            return `${base}/${image}`;
+          }
+
+          return image;
+        }
 
         console.log("Dashboard property image:", property.property_id, image, property);
         const price = window.Utils?.formatCurrency?.(property.price) ||
