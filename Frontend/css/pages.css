@@ -18,6 +18,42 @@
   align-items: center;
 }
 
+/* Light theme hero */
+html:not([data-theme="dark"]) .hero-modern,
+body:not([data-theme="dark"]) .hero-modern,
+[data-theme="light"] .hero-modern {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.16), transparent 32%),
+    radial-gradient(circle at 85% 80%, rgba(99, 102, 241, 0.12), transparent 34%),
+    linear-gradient(135deg, #f8fafc 0%, #eaf1fb 48%, #dbe7f7 100%);
+}
+
+/* Light theme hero text */
+html:not([data-theme="dark"]) .hero-content,
+body:not([data-theme="dark"]) .hero-content,
+[data-theme="light"] .hero-content {
+  color: #0f172a;
+}
+
+html:not([data-theme="dark"]) .hero-content p,
+body:not([data-theme="dark"]) .hero-content p,
+[data-theme="light"] .hero-content p {
+  color: #475569;
+}
+
+html:not([data-theme="dark"]) .hero-modern .search-bar,
+body:not([data-theme="dark"]) .hero-modern .search-bar,
+[data-theme="light"] .hero-modern .search-bar {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+
+
+
 .hero-content {
   position: relative;
 
