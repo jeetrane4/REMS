@@ -10,12 +10,9 @@
   padding: 120px 0;
 
   background:
-    linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.45),
-      rgba(0,0,0,0.75)
-    ),
-    url('../images/hero.webp') center/cover no-repeat;
+    radial-gradient(circle at top left, rgba(30, 64, 175, 0.55), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(79, 70, 229, 0.38), transparent 36%),
+    linear-gradient(135deg, #020617 0%, #111827 45%, #1e40af 100%);
 
   display: flex;
   align-items: center;
