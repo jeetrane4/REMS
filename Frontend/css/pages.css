@@ -18,9 +18,31 @@
   align-items: center;
 }
 
+/* Dark theme hero - force original dark look */
+html[data-theme="dark"] .hero-modern,
+body[data-theme="dark"] .hero-modern,
+[data-theme="dark"] .hero-modern {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.24), transparent 30%),
+    radial-gradient(circle at 85% 80%, rgba(79, 70, 229, 0.16), transparent 32%),
+    linear-gradient(135deg, #030712 0%, #0f172a 52%, #1e293b 100%);
+}
+
+html[data-theme="dark"] .hero-content,
+body[data-theme="dark"] .hero-content,
+[data-theme="dark"] .hero-content {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .hero-content p,
+body[data-theme="dark"] .hero-content p,
+[data-theme="dark"] .hero-content p {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 /* Light theme hero */
-html:not([data-theme="dark"]) .hero-modern,
-body:not([data-theme="dark"]) .hero-modern,
+html[data-theme="light"] .hero-modern,
+body[data-theme="light"] .hero-modern,
 [data-theme="light"] .hero-modern {
   background:
     radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.16), transparent 32%),
@@ -29,24 +51,26 @@ body:not([data-theme="dark"]) .hero-modern,
 }
 
 /* Light theme hero text */
-html:not([data-theme="dark"]) .hero-content,
-body:not([data-theme="dark"]) .hero-content,
+html[data-theme="light"] .hero-content,
+body[data-theme="light"] .hero-content,
 [data-theme="light"] .hero-content {
   color: #0f172a;
 }
 
-html:not([data-theme="dark"]) .hero-content p,
-body:not([data-theme="dark"]) .hero-content p,
+html[data-theme="light"] .hero-content p,
+body[data-theme="light"] .hero-content p,
 [data-theme="light"] .hero-content p {
   color: #475569;
 }
 
-html:not([data-theme="dark"]) .hero-modern .search-bar,
-body:not([data-theme="dark"]) .hero-modern .search-bar,
+/* Light theme search bar */
+html[data-theme="light"] .hero-modern .search-bar,
+body[data-theme="light"] .hero-modern .search-bar,
 [data-theme="light"] .hero-modern .search-bar {
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(203, 213, 225, 0.9);
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
